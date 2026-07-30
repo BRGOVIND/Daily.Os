@@ -8,16 +8,16 @@
 
 ## Why I built this
 
-Every productivity app I tried eventually became overwhelming.
+Every productivity app I tried eventually became uggh NOT GOOD.
 
 Some had too many features.
-Some wanted subscriptions.
+Some wanted subscriptions. Most of them wanted subscribtions.
 Some wanted me to create an account.
-Most of them felt like project management software instead of something I'd actually enjoy opening every morning.
+Most of them felt like project management software instead of something I'd open every morning.
 
 I wanted something different.
 
-A planner where every day has its own workspace.
+A planner where every day has its own workspace. And every user has a clear direction of what he did yesterday and what he didnt.
 
 Open the app.
 Click today's date.
@@ -31,22 +31,23 @@ No ads.
 No AI chat popping up everywhere.
 
 Just a clean place to organize your day.
+And I did this for me, Not for my resume.
 
 ---
 
 ## Features
 
-- 📅 Calendar-first workflow
-- ✅ Daily tasks
-- 🎯 Today's Focus
-- 🌸 Habit tracking
-- 🔁 Recurring tasks
-- 📝 Daily journal & notes
-- 📊 Productivity insights
-- 🌳 Progress tree
-- 📦 Export / Import data
-- 🌐 Offline-first
-- 📱 Installable as a PWA
+-  Calendar-first workflow
+-  Daily tasks
+-  Today's Focus
+-  Habit tracking
+-  Recurring tasks
+-  Daily journal & notes
+-  Productivity insights
+-  Progress tree
+-  Export / Import data
+-  Offline-first
+-  Installable as a PWA
 
 Everything is stored locally using IndexedDB.
 
