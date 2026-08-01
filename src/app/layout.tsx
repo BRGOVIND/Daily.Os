@@ -20,6 +20,10 @@ export const viewport: Viewport = {
   themeColor: "#FCF4F7",
   width: "device-width",
   initialScale: 1,
+  // Extend the canvas under the notch / Dynamic Island / gesture bar so we can
+  // manage those areas ourselves with safe-area insets. Zoom stays enabled for
+  // accessibility (no maximum-scale / user-scalable lock).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -13,11 +13,29 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Stop iOS from silently inflating text in landscape. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     @apply bg-canvas text-ink font-sans antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* Never rubber-band the whole page behind sheets/modals on touch. */
+    overscroll-behavior-y: none;
+  }
+
+  /* Touch polish: kill the grey tap flash and the legacy 300ms delay, and keep
+     momentum scrolling smooth on iOS. Applies to every interactive control. */
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   /* Calm, thin scrollbars that match the palette. */
@@ -63,5 +81,18 @@
   /* Subtle top divider used on section headers. */
   .hairline {
     border-color: #ececec;
+  }
+
+  /* Safe-area insets — respect the notch, Dynamic Island and gesture bars.
+     These resolve to 0 on hardware without insets, so they're inert on desktop. */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }

@@ -3,18 +3,25 @@
  * cache-first for static build assets. IndexedDB holds user data, so the SW
  * only needs to keep the app itself available offline. */
 
-const CACHE = "daily-os-v2";
+const CACHE = "daily-os-v3";
 const APP_SHELL = [
   "/",
   "/welcome",
   "/manifest.webmanifest",
+  "/icon.png",
+  "/apple-icon.png",
   "/icon-192.png",
   "/icon-512.png",
+  "/icon-maskable-512.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).catch(() => {}),
+    caches.open(CACHE).then((cache) =>
+      // Cache each shell entry independently so a single 404 (e.g. a hashed
+      // icon URL) can't abort the whole precache the way cache.addAll would.
+      Promise.all(APP_SHELL.map((url) => cache.add(url).catch(() => {}))),
+    ),
   );
   self.skipWaiting();
 });

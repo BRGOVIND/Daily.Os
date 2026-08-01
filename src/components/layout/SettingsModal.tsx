@@ -1,14 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
+  Accessibility,
   Bell,
   Check,
-  Download,
   Palette,
   Trash2,
-  Upload,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -20,16 +19,11 @@ import {
   notificationPermission,
   requestNotificationPermission,
 } from "@/lib/notifications";
-import {
-  downloadExport,
-  exportAll,
-  importAll,
-  ImportError,
-  readBundleFile,
-} from "@/lib/backup";
 import { useSettings } from "@/hooks/useSettings";
 import { TemplateManager } from "@/components/templates/TemplateManager";
 import { ProfilesSection } from "@/components/profile/ProfilesSection";
+import { DataSection } from "@/components/layout/DataSection";
+import { NativeSection } from "@/components/layout/NativeSection";
 import type { AccentKey } from "@/types";
 
 interface SettingsModalProps {
@@ -41,8 +35,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const { settings, update } = useSettings();
   const [confirming, setConfirming] = useState(false);
   const [cleared, setCleared] = useState(false);
-  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const reset = async () => {
     await Promise.all([
@@ -62,24 +54,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     } else {
       await update({ notificationsEnabled: false });
     }
-  };
-
-  const doExport = async () => {
-    downloadExport(await exportAll());
-  };
-
-  const doImport = async (file: File) => {
-    try {
-      const bundle = await readBundleFile(file);
-      await importAll(bundle);
-      setImportMsg({ ok: true, text: `Imported ${bundle.days.length} days.` });
-    } catch (err) {
-      setImportMsg({
-        ok: false,
-        text: err instanceof ImportError ? err.message : "Import failed.",
-      });
-    }
-    setTimeout(() => setImportMsg(null), 3500);
   };
 
   const permission = notificationPermission();
@@ -176,45 +150,24 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         {/* Data */}
         <section className="flex flex-col gap-3">
           <Label>Your data</Label>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" onClick={doExport}>
-              <Download className="h-4 w-4" /> Export
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => fileRef.current?.click()}
-            >
-              <Upload className="h-4 w-4" /> Import
-            </Button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void doImport(file);
-                e.target.value = "";
-              }}
-            />
-          </div>
-          <AnimatePresence>
-            {importMsg && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className={cn(
-                  "text-sm",
-                  importMsg.ok ? "text-success" : "text-alert",
-                )}
-              >
-                {importMsg.text}
-              </motion.p>
-            )}
-          </AnimatePresence>
+          <DataSection />
         </section>
+
+        {/* Accessibility */}
+        <section className="flex flex-col gap-3">
+          <Label className="flex items-center gap-1.5">
+            <Accessibility className="h-3.5 w-3.5" /> Accessibility
+          </Label>
+          <ToggleRow
+            title="Reduce motion"
+            description="Minimize animations and movement across the app."
+            checked={settings.reducedMotion ?? false}
+            onChange={() => update({ reducedMotion: !settings.reducedMotion })}
+          />
+        </section>
+
+        {/* Desktop (native shell only; renders null on web) */}
+        <NativeSection />
 
         {/* Theme placeholder */}
         <section className="flex items-center justify-between rounded-2xl border border-line bg-canvas/50 px-4 py-3">

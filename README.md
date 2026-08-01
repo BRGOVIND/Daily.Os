@@ -1,4 +1,5 @@
 # Daily OS
+
 ### A calm, offline-first operating system for your day.
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
@@ -6,48 +7,86 @@
 ![PWA](https://img.shields.io/badge/PWA-Offline-green)
 ![MIT](https://img.shields.io/badge/License-MIT-pink)
 
+---
+
 ## Why I built this
 
-Every productivity app I tried eventually became uggh NOT GOOD.
+Every productivity app I tried eventually became... too much.
 
 Some had too many features.
-Some wanted subscriptions. Most of them wanted subscribtions.
+
+Some wanted subscriptions.
+
 Some wanted me to create an account.
-Most of them felt like project management software instead of something I'd open every morning.
 
-I wanted something different.
+Most of them felt like project management software instead of something I'd actually enjoy opening every morning.
 
-A planner where every day has its own workspace. And every user has a clear direction of what he did yesterday and what he didnt.
+So I built something for myself.
+
+A planner where every day has its own workspace.
 
 Open the app.
+
 Click today's date.
+
 Plan your day.
+
 Get things done.
+
 Close it.
 
 No cloud.
+
 No login.
+
 No ads.
+
 No AI chat popping up everywhere.
 
-Just a clean place to organize your day.
-And I did this for me, Not for my resume.
+Just a calm place to organize your day.
+
+I didn't build Daily OS for my résumé.
+
+I built it because it's the planner I genuinely wanted to use every day.
 
 ---
 
 ## Features
 
--  Calendar-first workflow
--  Daily tasks
--  Today's Focus
--  Habit tracking
--  Recurring tasks
--  Daily journal & notes
--  Productivity insights
--  Progress tree
--  Export / Import data
--  Offline-first
--  Installable as a PWA
+### 📅 Daily Planning
+
+- Calendar-first workflow
+- Every day has its own workspace
+- Unlimited tasks
+- Today's Focus
+- Daily notes
+- Daily journal
+
+### 🌱 Productivity
+
+- Habit tracking
+- Recurring tasks
+- Productivity insights
+- Progress tree
+- Daily review
+- Tomorrow planning
+
+### 🧠 Organization
+
+- Multiple workspaces
+- Templates
+- Resources
+- Universal search
+- Export / Import
+- Offline-first
+
+### 💻 Desktop & Mobile
+
+- Installable PWA
+- Native Windows desktop app (Tauri)
+- Responsive mobile layout
+- Offline support
+- Native notifications
 
 Everything is stored locally using IndexedDB.
 
@@ -57,23 +96,25 @@ Your data never leaves your computer.
 
 ## Screenshots
 
-(Add screenshots here)
+> Add screenshots here.
 
 ---
 
-## Built With
+## Tech Stack
 
-- Next.js
+- Next.js 14
+- React
 - TypeScript
 - Tailwind CSS
 - Framer Motion
-- Dexie.js
+- Dexie.js (IndexedDB)
 - React Hook Form
 - date-fns
+- Tauri (Desktop)
 
 ---
 
-## Running locally
+## Running Locally
 
 ```bash
 git clone https://github.com/BRGOVIND/Daily.Os.git
@@ -85,11 +126,33 @@ npm install
 npm run dev
 ```
 
-Then open
+Other useful commands:
 
+```bash
+npm run build
+npm run lint
+npm run typecheck
+npm test
+
+# Desktop
+npm run dev:desktop
+npm run build:desktop
 ```
-http://localhost:3000
-```
+
+---
+
+## Documentation
+
+The project includes detailed documentation inside the `docs/` folder.
+
+- Architecture
+- Design System
+- Intelligence Engine
+- Workspace OS
+- Native Desktop
+- Collaboration
+- Release Notes
+- Contributing Guide
 
 ---
 
@@ -109,16 +172,37 @@ Come back tomorrow.
 
 That's it.
 
+Every feature should make the app calmer, not more complicated.
+
+---
+
+## Offline First
+
+Daily OS works entirely on your device.
+
+- Local IndexedDB storage
+- Installable as a PWA
+- Native desktop application
+- Browser notifications
+- Export & Import backups
+
+No accounts.
+
+No servers.
+
+No tracking.
+
 ---
 
 ## Roadmap
 
-Some ideas for the future
+Some ideas for the future:
 
+- Optional end-to-end encrypted sync
+- AI planning assistant (optional)
+- Local AI integrations
 - Better recurring tasks
 - Better reminders
-- End-to-end encrypted sync (optional)
-- Mobile app
 - More themes
 
 If an idea makes the app more complicated than useful, it probably won't be added.
@@ -131,12 +215,12 @@ Found a bug?
 
 Have an idea?
 
-Open an issue or submit a PR.
+Open an issue or submit a pull request.
 
 ---
 
 ## License
 
-MIT
+MIT License
 
 Feel free to fork it, improve it, or build something completely different with it.

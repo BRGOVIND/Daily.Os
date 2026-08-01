@@ -29,20 +29,42 @@ export function PwaController() {
   }, []);
 
   useEffect(() => {
+    // Already installed (launched standalone, or iOS home-screen)? Never nudge.
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (standalone) return;
+
     const onPrompt = (e: Event) => {
+      // The browser only fires this when the app genuinely qualifies for
+      // installation (valid manifest + service worker + HTTPS + engagement),
+      // so the banner surfaces only when Install will actually work.
       e.preventDefault();
       if (localStorage.getItem(DISMISS_KEY)) return;
       setDeferred(e as BeforeInstallPromptEvent);
       setVisible(true);
     };
+    const onInstalled = () => {
+      // Chrome installed it via the browser UI (or our button) — retire the nudge.
+      setVisible(false);
+      setDeferred(null);
+      localStorage.setItem(DISMISS_KEY, "1");
+    };
+
     window.addEventListener("beforeinstallprompt", onPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
 
   const install = async () => {
     if (!deferred) return;
     await deferred.prompt();
-    await deferred.userChoice;
+    const { outcome } = await deferred.userChoice;
+    // A deferred prompt can only be used once; drop it and close either way.
+    if (outcome === "accepted") localStorage.setItem(DISMISS_KEY, "1");
     setVisible(false);
     setDeferred(null);
   };
@@ -60,7 +82,8 @@ export function PwaController() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 320, damping: 30 }}
-          className="fixed bottom-6 left-1/2 z-40 flex w-[min(92vw,26rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift sm:bottom-8"
+          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+          className="fixed left-1/2 z-40 flex w-[min(92vw,26rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift"
           role="dialog"
           aria-label="Install Daily OS"
         >

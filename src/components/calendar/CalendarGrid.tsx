@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { buildMonthGrid, WEEKDAY_LABELS } from "@/lib/date";
 import { format } from "date-fns";
 import { DayCell } from "./DayCell";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { DaySummary } from "@/hooks/useMonthSummary";
 
 interface CalendarGridProps {
@@ -22,13 +23,16 @@ export function CalendarGrid({
   onSelect,
 }: CalendarGridProps) {
   const monthKey = format(month, "yyyy-MM");
+  // Phones get tighter geometry and smaller rings so every cell stays square
+  // and comfortably tappable without overflowing on narrow screens.
+  const compact = useMediaQuery("(max-width: 639px)");
   // Stable cell objects per month so memoized DayCells aren't re-rendered by
   // grid rebuilds on unrelated state changes.
   const cells = useMemo(() => buildMonthGrid(month), [month]);
 
   return (
     <div>
-      <div className="mb-3 grid grid-cols-7 gap-2 sm:gap-3">
+      <div className="mb-2 grid grid-cols-7 gap-1 sm:mb-3 sm:gap-3">
         {WEEKDAY_LABELS.map((label) => (
           <div
             key={label}
@@ -49,7 +53,7 @@ export function CalendarGrid({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction >= 0 ? -60 : 60 }}
             transition={{ type: "spring", stiffness: 260, damping: 30 }}
-            className="grid grid-cols-7 gap-2 sm:gap-3"
+            className="grid grid-cols-7 gap-1 sm:gap-3"
           >
             {cells.map((cell) => (
               <DayCell
@@ -57,6 +61,7 @@ export function CalendarGrid({
                 cell={cell}
                 summary={summaries[cell.key]}
                 onSelect={onSelect}
+                compact={compact}
               />
             ))}
           </motion.div>

@@ -25,22 +25,27 @@ export function CalendarHeader({
   direction,
 }: CalendarHeaderProps) {
   return (
-    <div className="mb-8 flex items-end justify-between gap-4">
-      <div className="overflow-hidden">
-        <motion.h1
-          key={format(month, "yyyy-MM")}
-          initial={{ opacity: 0, x: direction >= 0 ? 24 : -24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 30 }}
-          className="font-display text-[2.75rem] font-light leading-[1.05] tracking-[-0.02em] text-ink sm:text-6xl"
-        >
-          {format(month, "MMMM")}
-          <span className="ml-3 text-ink-muted/60">{format(month, "yyyy")}</span>
-        </motion.h1>
-      </div>
+    <div className="mb-7 flex items-end justify-between gap-3 sm:mb-8 sm:gap-4">
+      {/* Month + year. Stacks on phones so long names (September, December)
+          never clip or collide with the controls; inline on desktop. */}
+      <motion.h1
+        key={format(month, "yyyy-MM")}
+        initial={{ opacity: 0, x: direction >= 0 ? 24 : -24 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 30 }}
+        className="flex min-w-0 flex-col font-display text-[2.25rem] font-light leading-[1.02] tracking-[-0.02em] text-ink sm:block sm:text-6xl sm:leading-[1.05]"
+      >
+        <span className="truncate">{format(month, "MMMM")}</span>
+        <span className="text-ink-muted/60 sm:ml-3">{format(month, "yyyy")}</span>
+      </motion.h1>
 
-      <div className="flex items-center gap-2">
-        <Button variant="secondary" size="sm" onClick={onToday} className="mr-1">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onToday}
+          className="mr-0.5 h-9 sm:mr-1 sm:h-8"
+        >
           Today
         </Button>
         <Button
@@ -48,6 +53,7 @@ export function CalendarHeader({
           size="icon"
           aria-label="Previous month"
           onClick={onPrev}
+          className="h-11 w-11 sm:h-10 sm:w-10"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
@@ -56,6 +62,7 @@ export function CalendarHeader({
           size="icon"
           aria-label="Next month"
           onClick={onNext}
+          className="h-11 w-11 sm:h-10 sm:w-10"
         >
           <ChevronRight className="h-5 w-5" />
         </Button>

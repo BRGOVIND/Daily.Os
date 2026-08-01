@@ -6,11 +6,12 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { TodaysFocus } from "@/components/review/TodaysFocus";
 import { TaskList } from "@/components/tasks/TaskList";
+import { PlannerCard } from "@/components/day/PlannerCard";
 import { Habits } from "@/components/habits/Habits";
 import { Notes } from "@/components/notes/Notes";
 import { useDay } from "@/hooks/useDay";
 import { useHabits } from "@/hooks/useHabits";
-import { formatDayHeader, fromDateKey, isToday } from "@/lib/date";
+import { formatDayHeader, fromDateKey, isToday, toDateKey } from "@/lib/date";
 
 interface DayModalProps {
   dateKey: string | null;
@@ -57,9 +58,9 @@ export function DayModal({
       description="Day workspace"
       variant="sheet"
     >
-      <div className="relative flex max-h-[calc(100dvh-3rem)] flex-col">
+      <div className="relative flex max-h-[94dvh] flex-col sm:max-h-[calc(100dvh-3rem)]">
         {/* Header */}
-        <div className="flex shrink-0 items-start justify-between gap-4 px-6 pb-6 pt-8 sm:px-10 sm:pt-10">
+        <div className="flex shrink-0 items-start justify-between gap-4 px-6 pb-6 pt-9 sm:px-10 sm:pt-10">
           <div>
             {isCurrentDay && (
               <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
@@ -102,7 +103,10 @@ export function DayModal({
             onToggle={toggleTask}
             onDelete={deleteTask}
             onAdd={() => dateKey && onRequestAddTask(dateKey)}
+            today={today ? toDateKey(today) : undefined}
           />
+
+          <PlannerCard dateKey={dateKey} today={today} />
 
           <div className="h-px bg-line" />
 
@@ -120,7 +124,7 @@ export function DayModal({
         </div>
 
         {/* Floating save/done — changes persist automatically */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-card via-card/95 to-transparent px-6 pb-6 pt-8 sm:px-10">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-card via-card/95 to-transparent px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-8 sm:px-10">
           <span className="pointer-events-none text-xs text-ink-muted/70">
             Saved automatically
           </span>

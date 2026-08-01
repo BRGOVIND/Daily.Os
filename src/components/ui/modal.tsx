@@ -70,7 +70,8 @@ export function Modal({
                 "fixed inset-0 z-50 flex justify-center overflow-y-auto",
                 variant === "center"
                   ? "items-center p-4"
-                  : "items-start p-0 sm:p-6",
+                  : // Bottom sheet on phones, top-anchored panel on desktop.
+                    "items-end p-0 sm:items-start sm:p-6",
               )}
             >
               <Dialog.Content
@@ -91,10 +92,18 @@ export function Modal({
                     "relative bg-card outline-none",
                     variant === "center"
                       ? "w-full max-w-lg rounded-3xl shadow-lift"
-                      : "w-full max-w-3xl rounded-none sm:rounded-3xl shadow-lift min-h-full sm:min-h-0",
+                      : "w-full max-w-3xl rounded-t-3xl rounded-b-none shadow-lift max-h-[94dvh] sm:max-h-none sm:rounded-3xl",
                     className,
                   )}
                 >
+                  {variant === "sheet" && (
+                    // Grab handle — a familiar bottom-sheet affordance on touch,
+                    // hidden on desktop where the sheet reads as a panel.
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 top-2 z-10 mx-auto h-1.5 w-10 rounded-full bg-ink/15 sm:hidden"
+                    />
+                  )}
                   <Dialog.Title className="sr-only">{title}</Dialog.Title>
                   {description ? (
                     <Dialog.Description className="sr-only">

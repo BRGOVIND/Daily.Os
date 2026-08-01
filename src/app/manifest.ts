@@ -7,6 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Daily OS",
     description:
       "A calm, offline-first Daily Operating System. Every day has its own workspace.",
+    lang: "en",
+    dir: "ltr",
     id: "/",
     start_url: "/",
     scope: "/",
