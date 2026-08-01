@@ -1,0 +1,9 @@
+# Rust / Cargo build output
+/target/
+
+# Tauri generated schemas & bindings
+/gen/schemas/
+
+# App icons ARE committed: they're required build assets referenced by
+# tauri.conf.json (bundle.icon / trayIcon). Regenerate with:
+#   npx tauri icon public/icon-512.png
