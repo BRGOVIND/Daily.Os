@@ -10,10 +10,14 @@ import type {
   Member,
   Mission,
   Mutation,
+  PomodoroSession,
+  QuickNote,
   RecurringTask,
   Resource,
+  StickyNote,
   Task,
   Template,
+  UtilityRecord,
   Workspace,
   WorkspaceNote,
 } from "@/types";
@@ -54,6 +58,10 @@ export class DailyOSDatabase extends Dexie {
   comments!: Table<Comment, string>;
   activity!: Table<Activity, string>;
   outbox!: Table<Mutation, string>;
+  quickNotes!: Table<QuickNote, string>;
+  stickyNotes!: Table<StickyNote, string>;
+  pomodoroSessions!: Table<PomodoroSession, string>;
+  utilities!: Table<UtilityRecord, string>;
 
   constructor(name: string) {
     super(name);
@@ -138,6 +146,30 @@ export class DailyOSDatabase extends Dexie {
       comments: "id, workspaceId, [targetType+targetId], createdAt",
       activity: "id, workspaceId, createdAt",
       outbox: "id, workspaceId, status, lamport",
+    });
+
+    // v6 — Daily productivity: quick notes, sticky notes, Pomodoro history and
+    // a generic per-tool utility store. All additive; nothing existing changes.
+    this.version(6).stores({
+      days: "date, updatedAt",
+      habits: "id, order",
+      templates: "id, order",
+      recurring: "id, createdAt",
+      settings: "id",
+      missions: "id, createdAt, archived",
+      workspaces: "id, order, archived, createdAt",
+      notes: "id, workspaceId, updatedAt",
+      resources: "id, workspaceId, kind, createdAt",
+      journal: "id, date, workspaceId",
+      identity: "id",
+      members: "id, workspaceId, actorId",
+      comments: "id, workspaceId, [targetType+targetId], createdAt",
+      activity: "id, workspaceId, createdAt",
+      outbox: "id, workspaceId, status, lamport",
+      quickNotes: "id, date, pinned, updatedAt",
+      stickyNotes: "id, updatedAt",
+      pomodoroSessions: "id, date, startedAt",
+      utilities: "id, updatedAt",
     });
   }
 }
@@ -754,4 +786,124 @@ export async function enqueueMutation(
   m: Omit<Mutation, "id" | "createdAt" | "status">,
 ): Promise<void> {
   await db.outbox.add({ id: createId(), ...m, createdAt: Date.now(), status: "pending" });
+}
+
+// ─── Quick Notes (Phase 9) ───────────────────────────────────────────────────
+
+/** Create a quick note for a day and return its id. */
+export async function addQuickNote(
+  date: string,
+  body = "",
+  color: QuickNote["color"] = "yellow",
+): Promise<string> {
+  const now = Date.now();
+  const note: QuickNote = {
+    id: createId(),
+    body,
+    date,
+    pinned: false,
+    color,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.quickNotes.add(note);
+  return note.id;
+}
+
+export async function updateQuickNote(
+  id: string,
+  patch: Partial<Omit<QuickNote, "id" | "createdAt">>,
+): Promise<void> {
+  const current = await db.quickNotes.get(id);
+  if (!current) return;
+  await db.quickNotes.put({ ...current, ...patch, id, updatedAt: Date.now() });
+}
+
+/** Toggle a note between day-scoped and pinned-global. */
+export async function toggleQuickNotePinned(id: string): Promise<void> {
+  const current = await db.quickNotes.get(id);
+  if (!current) return;
+  await db.quickNotes.put({
+    ...current,
+    pinned: !current.pinned,
+    updatedAt: Date.now(),
+  });
+}
+
+export async function deleteQuickNote(id: string): Promise<void> {
+  await db.quickNotes.delete(id);
+}
+
+// ─── Sticky Notes (Phase 9) ──────────────────────────────────────────────────
+
+const STICKY_PALETTE: StickyNote["color"][] = [
+  "yellow",
+  "pink",
+  "blue",
+  "green",
+  "purple",
+  "gray",
+];
+
+/** Create a sticky note, cascading its position so new ones don't stack exactly. */
+export async function addStickyNote(): Promise<string> {
+  const now = Date.now();
+  const count = await db.stickyNotes.count();
+  const step = (count % 6) * 26;
+  const note: StickyNote = {
+    id: createId(),
+    body: "",
+    color: STICKY_PALETTE[count % STICKY_PALETTE.length],
+    x: 24 + step,
+    y: 24 + step,
+    width: 216,
+    height: 200,
+    collapsed: false,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.stickyNotes.add(note);
+  return note.id;
+}
+
+export async function updateStickyNote(
+  id: string,
+  patch: Partial<Omit<StickyNote, "id" | "createdAt">>,
+): Promise<void> {
+  const current = await db.stickyNotes.get(id);
+  if (!current) return;
+  await db.stickyNotes.put({ ...current, ...patch, id, updatedAt: Date.now() });
+}
+
+export async function deleteStickyNote(id: string): Promise<void> {
+  await db.stickyNotes.delete(id);
+}
+
+// ─── Pomodoro history (Phase 9) ──────────────────────────────────────────────
+
+/** Record a finished (or skipped) Pomodoro interval. */
+export async function recordPomodoroSession(
+  session: Omit<PomodoroSession, "id">,
+): Promise<void> {
+  await db.pomodoroSessions.add({ id: createId(), ...session });
+}
+
+/** Read every session that started on a given day key. */
+export async function getPomodoroSessionsForDay(
+  date: string,
+): Promise<PomodoroSession[]> {
+  return db.pomodoroSessions.where("date").equals(date).sortBy("startedAt");
+}
+
+// ─── Utilities store (Phase 9) ───────────────────────────────────────────────
+
+/** Read a utility's persisted blob, or null if it has none yet. */
+export async function getUtility<T>(id: string): Promise<T | null> {
+  const row = await db.utilities.get(id);
+  return row ? (row.data as T) : null;
+}
+
+/** Persist a utility's blob (upsert). */
+export async function saveUtility(id: string, data: unknown): Promise<void> {
+  await db.utilities.put({ id, data, updatedAt: Date.now() });
 }

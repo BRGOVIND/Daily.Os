@@ -4,11 +4,15 @@ import type {
   EnergyLevel,
   Mood,
   NoteBlockType,
+  PomodoroPhase,
   Priority,
   RecurrenceRule,
   ResourceKind,
+  StickyColor,
   TaskColor,
   Template,
+  TemplateItem,
+  ThemeKey,
 } from "@/types";
 
 export const APP_NAME = "Daily OS";
@@ -131,8 +135,36 @@ export const DEFAULT_SETTINGS = {
   accent: "blossom" as AccentKey,
   notificationsEnabled: false,
   reviewEnabled: true,
-  theme: "light" as const,
+  theme: "light" as ThemeKey,
 };
+
+/** The three full application themes, for the Settings picker. Swatches mirror
+ * the CSS-variable palettes defined in globals.css (canvas / card / ink). */
+export const THEMES: {
+  key: ThemeKey;
+  label: string;
+  description: string;
+  swatch: { canvas: string; card: string; ink: string };
+}[] = [
+  {
+    key: "light",
+    label: "Blossom",
+    description: "Soft, bright and calm.",
+    swatch: { canvas: "#FCF4F7", card: "#FFFFFF", ink: "#141115" },
+  },
+  {
+    key: "dark",
+    label: "Charcoal",
+    description: "Elegant dark, never pure black.",
+    swatch: { canvas: "#17171B", card: "#202025", ink: "#ECECF0" },
+  },
+  {
+    key: "paper",
+    label: "Warm Paper",
+    description: "Cream ground, soft brown ink.",
+    swatch: { canvas: "#F4EDE0", card: "#FBF6EC", ink: "#3C2E22" },
+  },
+];
 
 /** The hour (24h) at which the daily review prompt appears. */
 export const REVIEW_HOUR = 22;
@@ -317,4 +349,159 @@ export const SUGGESTED_HABITS: { name: string; color: TaskColor }[] = [
   { name: "Read", color: "blue" },
   { name: "Meditate", color: "violet" },
   { name: "Sleep before midnight", color: "slate" },
+];
+
+// ─── Daily productivity (Phase 9) ────────────────────────────────────────────
+
+/** Warm paper palette for quick notes and sticky notes (light-theme surfaces). */
+export const STICKY_COLORS: Record<
+  StickyColor,
+  { label: string; bg: string; border: string; text: string; accent: string }
+> = {
+  yellow: { label: "Yellow", bg: "#FEF6D8", border: "#F4E4A6", text: "#7A5B12", accent: "#E9C349" },
+  pink: { label: "Pink", bg: "#FCE4EF", border: "#F6C3DA", text: "#9C2A5C", accent: "#E06699" },
+  blue: { label: "Blue", bg: "#E1F0FB", border: "#BFDFF4", text: "#1F5C86", accent: "#5AA6DC" },
+  green: { label: "Green", bg: "#E1F5E7", border: "#BEE9CB", text: "#1F6B41", accent: "#5CB77E" },
+  purple: { label: "Purple", bg: "#ECE6FB", border: "#D5C9F3", text: "#4F3A93", accent: "#8B72D8" },
+  gray: { label: "Slate", bg: "#EEF1F5", border: "#DCE1E8", text: "#3C4653", accent: "#8A96A5" },
+};
+
+export const STICKY_COLOR_KEYS = Object.keys(STICKY_COLORS) as StickyColor[];
+
+/** Default Pomodoro configuration (minutes + behaviour). */
+export const POMODORO_DEFAULTS = {
+  focus: 25,
+  shortBreak: 5,
+  longBreak: 15,
+  /** Long break after this many focus sessions. */
+  longEvery: 4,
+  autoNext: true,
+} as const;
+
+export const POMODORO_PHASES: Record<
+  PomodoroPhase,
+  { label: string; tone: string }
+> = {
+  focus: { label: "Focus", tone: "#8C1232" },
+  "short-break": { label: "Short break", tone: "#3FA66B" },
+  "long-break": { label: "Long break", tone: "#3B82C4" },
+};
+
+/** Duration quick-picks (minutes) offered for a countdown timer utility. */
+export const COUNTDOWN_PRESETS = [1, 3, 5, 10, 15, 20, 30, 45, 60];
+
+/** The lightweight tools listed in the Daily Utilities slide-out. */
+export const DAILY_UTILITIES: {
+  id: string;
+  name: string;
+  hint: string;
+}[] = [
+  { id: "shopping", name: "Shopping List", hint: "Quick checklist" },
+  { id: "expenses", name: "Expense Notes", hint: "Jot spending" },
+  { id: "countdown", name: "Countdown", hint: "Set a timer" },
+  { id: "metronome", name: "Metronome", hint: "Keep tempo" },
+  { id: "score", name: "Score Counter", hint: "Track points" },
+  { id: "billsplit", name: "Bill Split", hint: "Divide a bill" },
+  { id: "converter", name: "Time Converter", hint: "Zones & units" },
+  { id: "stopwatch", name: "Stopwatch", hint: "Lap timing" },
+];
+
+/**
+ * Smart recurring day templates (Phase 9, feature 6). Deliberately emoji-free —
+ * minimal and elegant. Applying one drops its tasks onto a chosen day; each can
+ * also be materialized as a recurring routine.
+ */
+export interface DayTemplateDef {
+  id: string;
+  name: string;
+  description: string;
+  suggested: RecurrenceRule;
+  items: TemplateItem[];
+}
+
+export const DAY_TEMPLATES: DayTemplateDef[] = [
+  {
+    id: "day-morning",
+    name: "Morning Routine",
+    description: "A calm, repeatable start to the day.",
+    suggested: "daily",
+    items: [
+      { title: "Hydrate", category: "Health", priority: "medium", color: "blue" },
+      { title: "Stretch and breathe", category: "Health", priority: "low", color: "green" },
+      { title: "Set three intentions", category: "Personal", priority: "high", color: "burgundy" },
+      { title: "Review the calendar", category: "Personal", priority: "medium", color: "slate" },
+    ],
+  },
+  {
+    id: "day-university",
+    name: "University Day",
+    description: "Lectures, notes and steady progress.",
+    suggested: "weekdays",
+    items: [
+      { title: "Attend lectures", category: "Learning", priority: "high", color: "burgundy" },
+      { title: "Rewrite lecture notes", category: "Learning", priority: "medium", color: "blue" },
+      { title: "Assignment progress", category: "Learning", priority: "high", color: "amber" },
+      { title: "Read one chapter", category: "Learning", priority: "low", color: "violet" },
+    ],
+  },
+  {
+    id: "day-gym",
+    name: "Gym Day",
+    description: "Train, refuel, recover.",
+    suggested: "weekly",
+    items: [
+      { title: "Warm up", category: "Health", priority: "medium", color: "green" },
+      { title: "Main workout", category: "Health", priority: "high", color: "burgundy" },
+      { title: "Protein and hydrate", category: "Health", priority: "low", color: "amber" },
+      { title: "Cool down and stretch", category: "Health", priority: "medium", color: "blue" },
+    ],
+  },
+  {
+    id: "day-coding",
+    name: "Coding Day",
+    description: "Ship something small every day.",
+    suggested: "weekdays",
+    items: [
+      { title: "Plan the one task", category: "Work", priority: "high", color: "burgundy" },
+      { title: "Deep work block", category: "Work", priority: "high", color: "violet" },
+      { title: "Commit and push", category: "Work", priority: "medium", color: "green" },
+      { title: "Write down what's next", category: "Work", priority: "low", color: "slate" },
+    ],
+  },
+  {
+    id: "day-interview",
+    name: "Interview Prep",
+    description: "Sharpen fundamentals and delivery.",
+    suggested: "daily",
+    items: [
+      { title: "Two practice problems", category: "Learning", priority: "high", color: "burgundy" },
+      { title: "Review one core topic", category: "Learning", priority: "medium", color: "blue" },
+      { title: "Rehearse a behavioural answer", category: "Work", priority: "medium", color: "amber" },
+      { title: "Reflect on the mock", category: "Personal", priority: "low", color: "violet" },
+    ],
+  },
+  {
+    id: "day-weekend-reset",
+    name: "Weekend Reset",
+    description: "Tidy the week and prepare the next.",
+    suggested: "weekends",
+    items: [
+      { title: "Clear the inbox", category: "Personal", priority: "medium", color: "blue" },
+      { title: "Tidy the space", category: "Personal", priority: "low", color: "green" },
+      { title: "Review the week", category: "Personal", priority: "high", color: "burgundy" },
+      { title: "Plan the week ahead", category: "Personal", priority: "high", color: "violet" },
+    ],
+  },
+  {
+    id: "day-exam-week",
+    name: "Exam Week",
+    description: "Focused revision under pressure.",
+    suggested: "daily",
+    items: [
+      { title: "Revise weakest topic", category: "Learning", priority: "high", color: "burgundy" },
+      { title: "Timed practice paper", category: "Learning", priority: "high", color: "amber" },
+      { title: "Active recall session", category: "Learning", priority: "medium", color: "blue" },
+      { title: "Rest and sleep early", category: "Health", priority: "medium", color: "green" },
+    ],
+  },
 ];

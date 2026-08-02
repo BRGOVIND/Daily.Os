@@ -410,13 +410,16 @@ export type AccentKey =
   | "indigo"
   | "slate";
 
+/** Full application themes (Phase 10). Each re-skins every surface token. */
+export type ThemeKey = "light" | "dark" | "paper";
+
 export interface AppSettings {
   id: "app";
   accent: AccentKey;
   notificationsEnabled: boolean;
   reviewEnabled: boolean;
-  /** Placeholder for a future dark theme. */
-  theme: "light";
+  /** Active application theme (Phase 10). Defaults to light "Blossom". */
+  theme: ThemeKey;
   /** The workspace currently in focus (Phase 5). Null = default workspace. */
   activeWorkspaceId?: string | null;
   /**
@@ -424,6 +427,18 @@ export interface AppSettings {
    * Undefined = follow the operating system's prefers-reduced-motion.
    */
   reducedMotion?: boolean;
+  /**
+   * Pomodoro durations (minutes) and behaviour (Phase 9). Undefined = defaults.
+   */
+  pomodoro?: {
+    focus: number;
+    shortBreak: number;
+    longBreak: number;
+    /** Take a long break after this many focus sessions. */
+    longEvery: number;
+    /** Automatically start the next session when one finishes. */
+    autoNext: boolean;
+  };
 }
 
 export type TaskDraft = Pick<
@@ -444,6 +459,91 @@ export type TaskDraft = Pick<
   | "workspaceId"
   | "assigneeId"
 >;
+
+// ─── Daily productivity (Phase 9) ───────────────────────────────────────────
+//
+// A purely additive layer of everyday tools: quick notes, sticky notes, a real
+// Pomodoro with history, and small offline utilities. Every table below is new;
+// existing data and behaviour are untouched.
+
+/** Warm paper palette shared by quick notes and sticky notes. */
+export type StickyColor =
+  | "yellow"
+  | "pink"
+  | "blue"
+  | "green"
+  | "purple"
+  | "gray";
+
+/**
+ * A tiny, instantly-autosaving note — think Apple's Quick Note. Belongs to a
+ * day by default; pinning makes it show across every day. Body is plain
+ * Markdown (rendered lightly, never parsed into blocks).
+ */
+export interface QuickNote {
+  id: string;
+  body: string;
+  /** Owning day key (yyyy-MM-dd), or null once pinned globally. */
+  date: string | null;
+  /** Pinned notes surface on every day, not just their own. */
+  pinned: boolean;
+  color: StickyColor;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * A draggable, resizable, collapsible sticky pinned to the workspace canvas.
+ * Position, size and collapsed state all persist so the board looks the same
+ * every time it's opened.
+ */
+export interface StickyNote {
+  id: string;
+  body: string;
+  color: StickyColor;
+  /** Top-left position in px, relative to the sticky layer. */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  collapsed: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** The three Pomodoro phases. */
+export type PomodoroPhase = "focus" | "short-break" | "long-break";
+
+/**
+ * A completed (or skipped) Pomodoro interval, kept for history and the daily
+ * focus statistics. `date` is the day key it started on so stats group cleanly.
+ */
+export interface PomodoroSession {
+  id: string;
+  phase: PomodoroPhase;
+  /** Planned length in seconds. */
+  plannedSeconds: number;
+  /** Seconds actually elapsed before it finished or was skipped. */
+  elapsedSeconds: number;
+  /** True if it ran to completion; false if skipped/stopped early. */
+  completed: boolean;
+  /** Optional task the session was focused on, for context in history. */
+  taskTitle: string | null;
+  date: string;
+  startedAt: number;
+  endedAt: number;
+}
+
+/**
+ * A single small-utility's persisted state (shopping list, expense notes, score
+ * counter…). `id` is the tool key; `data` is an opaque, tool-owned blob so new
+ * utilities never need a schema migration.
+ */
+export interface UtilityRecord {
+  id: string;
+  data: unknown;
+  updatedAt: number;
+}
 
 /** Shape of a full data export / import bundle. */
 export interface ExportBundle {
