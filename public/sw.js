@@ -3,7 +3,7 @@
  * cache-first for static build assets. IndexedDB holds user data, so the SW
  * only needs to keep the app itself available offline. */
 
-const CACHE = "daily-os-v3";
+const CACHE = "daily-os-v4";
 const APP_SHELL = [
   "/",
   "/welcome",
