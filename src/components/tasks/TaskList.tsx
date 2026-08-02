@@ -75,7 +75,7 @@ export function TaskList({
                 "flex items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-medium transition-colors",
                 showFilters
                   ? "bg-accent/10 text-accent"
-                  : "text-ink-muted hover:bg-black/[0.04]",
+                  : "text-ink-muted hover:bg-fill/[0.04]",
               )}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" /> Filter

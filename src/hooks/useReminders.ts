@@ -13,15 +13,20 @@ export interface ReminderTarget {
 const MAX_HORIZON_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Schedules in-session browser notifications for upcoming task reminders.
- * Only reminders within the next 24h are timed; past-due ones are skipped.
- * Timers are rebuilt whenever the target set changes and cleared on unmount.
+ * Schedules in-session notifications for upcoming task reminders. Only reminders
+ * within the next 24h are timed; past-due ones are skipped. Timers are rebuilt
+ * whenever the target set changes and cleared on unmount. When a reminder fires
+ * it shows an OS/browser notification and (optionally) calls `onFire` so the app
+ * can surface an in-app banner with snooze / dismiss actions.
  */
 export function useReminders(
   targets: ReminderTarget[],
   enabled: boolean,
+  onFire?: (target: ReminderTarget) => void,
 ): void {
   const firedRef = useRef<Set<string>>(new Set());
+  const fireCb = useRef(onFire);
+  fireCb.current = onFire;
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
@@ -41,6 +46,7 @@ export function useReminders(
           "Reminder · Daily OS",
           `${t.title} — ${format(t.reminderAt, "p")}`,
         );
+        fireCb.current?.(t);
       }, delay);
       timers.push(timer);
     }

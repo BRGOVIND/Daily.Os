@@ -140,7 +140,7 @@ export function ProfilesSection() {
                     type="button"
                     onClick={() => setConfirmDelete(null)}
                     aria-label="Cancel"
-                    className="flex h-6 w-6 items-center justify-center rounded-full text-ink-muted hover:bg-black/5"
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-ink-muted hover:bg-fill/5"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

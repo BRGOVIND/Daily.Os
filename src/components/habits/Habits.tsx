@@ -69,7 +69,7 @@ const HabitChip = memo(function HabitChip({
               animate={{ opacity: 1, y: -22, scale: 1 }}
               exit={{ opacity: 0, y: -30 }}
               transition={spring.pop}
-              className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-white shadow-lift"
+              className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-scrim px-2 py-0.5 text-[11px] font-semibold text-white shadow-lift"
             >
               🎉 {streak}-day streak
             </motion.span>

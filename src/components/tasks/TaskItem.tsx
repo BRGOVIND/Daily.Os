@@ -64,16 +64,17 @@ export const TaskItem = memo(function TaskItem({
       <span
         aria-hidden
         className="mt-0.5 h-[calc(100%-2px)] w-1 shrink-0 self-stretch rounded-full"
-        style={{ backgroundColor: task.completed ? "#E2E2E2" : swatch.dot }}
+        style={{ backgroundColor: task.completed ? "rgb(var(--line))" : swatch.dot }}
       />
 
-      <button
+      <motion.button
         type="button"
         onClick={() => onToggle(task.id)}
         aria-pressed={task.completed}
         aria-label={task.completed ? "Mark as not done" : "Mark as done"}
+        whileTap={{ scale: 0.85 }}
         className={cn(
-          "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all",
+          "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
           task.completed
             ? "border-success bg-success text-white"
             : "border-line text-transparent hover:border-accent",
@@ -82,11 +83,11 @@ export const TaskItem = memo(function TaskItem({
         <motion.span
           initial={false}
           animate={{ scale: task.completed ? 1 : 0 }}
-          transition={{ type: "spring", stiffness: 500, damping: 22 }}
+          transition={{ type: "spring", stiffness: 520, damping: 20 }}
         >
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
         </motion.span>
-      </button>
+      </motion.button>
 
       <div className="min-w-0 flex-1">
         <p

@@ -17,7 +17,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: "Global",
     items: [
-      { keys: ["⌘", "K"], label: "Universal search" },
+      { keys: ["⌘", "K"], label: "Command palette" },
       { keys: ["/"], label: "Universal search" },
       { keys: ["?"], label: "Show this cheat-sheet" },
       { keys: ["⌘", "S"], label: "Confirm everything's saved" },
@@ -27,6 +27,9 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: "Navigate",
     items: [
+      { keys: ["⌘", "1"], label: "Today's workspace" },
+      { keys: ["⌘", "2"], label: "Agenda" },
+      { keys: ["⌘", "3"], label: "Focus mode" },
       { keys: ["T"], label: "Open today" },
       { keys: ["W"], label: "Open workspaces" },
       { keys: ["←"], label: "Previous month" },
@@ -34,7 +37,11 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
   {
-    title: "Create",
-    items: [{ keys: ["N"], label: "New task" }],
+    title: "Capture",
+    items: [
+      { keys: ["N"], label: "New task" },
+      { keys: ["⌘", "⇧", "Space"], label: "Quick capture" },
+      { keys: ["⌘", "⌥", "N"], label: "Quick note" },
+    ],
   },
 ];

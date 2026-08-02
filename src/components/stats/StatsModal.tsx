@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Modal } from "@/components/ui/modal";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Overview } from "./Overview";
 import { IntelligencePanel } from "./IntelligencePanel";
 import { StatsHeatmap } from "./StatsHeatmap";
@@ -63,8 +64,14 @@ export function StatsModal({
 
         <div className="flex-1 space-y-12 overflow-y-auto px-6 pb-16 pt-6 sm:px-10">
           {!stats ? (
-            <div className="flex h-64 items-center justify-center">
-              <span className="h-8 w-8 animate-pulse rounded-full bg-accent/20" />
+            <div className="space-y-8">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-2xl" />
+                ))}
+              </div>
+              <Skeleton className="h-40 w-full rounded-3xl" />
+              <Skeleton className="h-32 w-full rounded-3xl" />
             </div>
           ) : (
             <>

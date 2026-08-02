@@ -288,7 +288,7 @@ export function GrowthTree({ stats }: GrowthTreeProps) {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white shadow-lift"
+              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-scrim px-2.5 py-1.5 text-xs font-medium text-white shadow-lift"
               style={toPct(hover.x, hover.y - 8)}
             >
               {hover.text}
@@ -318,7 +318,7 @@ export function GrowthTree({ stats }: GrowthTreeProps) {
                   type="button"
                   onClick={() => setSelected(null)}
                   aria-label="Close"
-                  className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:bg-black/5"
+                  className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:bg-fill/5"
                 >
                   <X className="h-4 w-4" />
                 </button>

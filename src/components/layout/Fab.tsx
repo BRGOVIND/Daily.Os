@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 
@@ -9,7 +10,7 @@ interface FabProps {
 }
 
 /** The one persistent action: a burgundy orb, bottom-right, that adds a task. */
-export function Fab({ onClick, label = "Add task" }: FabProps) {
+export const Fab = memo(function Fab({ onClick, label = "Add task" }: FabProps) {
   return (
     <motion.button
       type="button"
@@ -25,4 +26,4 @@ export function Fab({ onClick, label = "Add task" }: FabProps) {
       <Plus className="h-6 w-6" strokeWidth={2.4} />
     </motion.button>
   );
-}
+});

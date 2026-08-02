@@ -125,7 +125,7 @@ const FocusCard = memo(function FocusCard({
           type="button"
           onClick={() => onRemove(item.id)}
           aria-label="Remove focus item"
-          className="flex h-6 w-6 items-center justify-center rounded-full text-ink-muted/40 opacity-0 transition-all hover:bg-black/5 hover:text-ink group-hover:opacity-100"
+          className="flex h-6 w-6 items-center justify-center rounded-full text-ink-muted/40 opacity-0 transition-all hover:bg-fill/5 hover:text-ink group-hover:opacity-100"
         >
           <X className="h-3.5 w-3.5" />
         </button>

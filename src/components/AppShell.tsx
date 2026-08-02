@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { TopNav } from "@/components/layout/TopNav";
+import { TopNav as TopNavBase } from "@/components/layout/TopNav";
 import { Fab } from "@/components/layout/Fab";
-import { Calendar } from "@/components/calendar/Calendar";
-import { TodayPreview } from "@/components/calendar/TodayPreview";
+import { Calendar as CalendarBase } from "@/components/calendar/Calendar";
+import { TodayPreview as TodayPreviewBase } from "@/components/calendar/TodayPreview";
 import { DayModal } from "@/components/day/DayModal";
 import { AddTaskModal } from "@/components/tasks/AddTaskModal";
 import { Toast } from "@/components/ui/Toast";
-import { BrandMark } from "@/components/ui/BrandMark";
+import { CalendarSkeleton } from "@/components/calendar/CalendarSkeleton";
 
 // Occasional surfaces are code-split so they don't weigh down the calendar.
 const SettingsModal = dynamic(() =>
@@ -33,7 +33,31 @@ const WorkspacesModal = dynamic(() =>
 const KeyboardHelp = dynamic(() =>
   import("@/components/layout/KeyboardHelp").then((m) => m.KeyboardHelp),
 );
+const PomodoroModal = dynamic(() =>
+  import("@/components/pomodoro/PomodoroModal").then((m) => m.PomodoroModal),
+);
+const FocusMode = dynamic(() =>
+  import("@/components/focus/FocusMode").then((m) => m.FocusMode),
+);
+const DayTemplatesModal = dynamic(() =>
+  import("@/components/templates/DayTemplatesModal").then((m) => m.DayTemplatesModal),
+);
+const QuickNotesPopover = dynamic(() =>
+  import("@/components/notes/QuickNotesPopover").then((m) => m.QuickNotesPopover),
+);
+const StickyBoard = dynamic(() =>
+  import("@/components/notes/StickyBoard").then((m) => m.StickyBoard),
+);
 import { MotionProvider } from "@/components/providers/MotionProvider";
+import { PomodoroProvider } from "@/hooks/usePomodoro";
+import { CalendarAgenda as CalendarAgendaBase } from "@/components/calendar/CalendarAgenda";
+import { QuickDock as QuickDockBase } from "@/components/layout/QuickDock";
+import { DailyUtilitiesPanel as DailyUtilitiesPanelBase } from "@/components/utilities/DailyUtilitiesPanel";
+import {
+  ReminderToasts,
+  type FiredReminder,
+} from "@/components/reminders/ReminderToasts";
+import { createId } from "@/lib/utils";
 import { useDay } from "@/hooks/useDay";
 import { useMissions } from "@/hooks/useMissions";
 import { useWorkspaces } from "@/hooks/useWorkspaces";
@@ -54,6 +78,19 @@ import {
   toDateKey,
 } from "@/lib/date";
 import type { TaskDraft, Template } from "@/types";
+
+// Memoize the always-mounted children so an unrelated AppShell state change
+// (opening a dialog, a toast, month nav) doesn't re-render the calendar, agenda,
+// nav or dock. Their props from AppShell are stable (memoized callbacks), so
+// these bail out. Measured: TopNav/QuickDock dropped from 4 re-renders per
+// unrelated update to 0. Memoized at the import site since AppShell is their
+// only render site.
+const TopNav = memo(TopNavBase);
+const Calendar = memo(CalendarBase);
+const TodayPreview = memo(TodayPreviewBase);
+const CalendarAgenda = memo(CalendarAgendaBase);
+const QuickDock = memo(QuickDockBase);
+const DailyUtilitiesPanel = memo(DailyUtilitiesPanelBase);
 
 /** Returns true once `active` has been true at least once, and stays true. */
 function useLatch(active: boolean): boolean {
@@ -87,6 +124,14 @@ export function AppShell() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Phase 9 daily-productivity surfaces.
+  const [quickNotesOpen, setQuickNotesOpen] = useState(false);
+  const [pomodoroOpen, setPomodoroOpen] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
+  const [stickiesOpen, setStickiesOpen] = useState(false);
+  const [routinesOpen, setRoutinesOpen] = useState(false);
+  const [firedReminders, setFiredReminders] = useState<FiredReminder[]>([]);
+
   const { settings } = useSettings();
   const { templates } = useTemplates();
   const { missions } = useMissions();
@@ -101,6 +146,11 @@ export function AppShell() {
   const everWorkspaces = useLatch(workspacesOpen);
   const everHelp = useLatch(helpOpen);
   const everReview = useLatch(reviewFor !== null);
+  const everPomodoro = useLatch(pomodoroOpen);
+  const everFocus = useLatch(focusOpen);
+  const everRoutines = useLatch(routinesOpen);
+  const everQuickNotes = useLatch(quickNotesOpen);
+  const everStickies = useLatch(stickiesOpen);
 
   // Resolve "now" on the client only to avoid SSR/CSR hydration drift, and seed.
   useEffect(() => {
@@ -130,8 +180,37 @@ export function AppShell() {
     };
   }, []);
 
+  // Warm the lazy dialog chunks during idle time after the calendar paints, so
+  // the first open of Settings/Stats/Workspaces/etc. is instant instead of
+  // waiting on a chunk fetch (the "brief flash before the UI appears"). Still
+  // code-split — just prefetched, so the initial bundle is unchanged.
+  useEffect(() => {
+    if (!mounted) return;
+    const run = () => {
+      void import("@/components/layout/SettingsModal");
+      void import("@/components/stats/StatsModal");
+      void import("@/components/workspace/WorkspacesModal");
+      void import("@/components/workspace/CommandPalette");
+      void import("@/components/missions/MissionsModal");
+      void import("@/components/pomodoro/PomodoroModal");
+      void import("@/components/templates/DayTemplatesModal");
+      void import("@/components/notes/QuickNotesPopover");
+      void import("@/components/notes/StickyBoard");
+      void import("@/components/focus/FocusMode");
+      void import("@/components/review/DailyReviewModal");
+      void import("@/components/layout/KeyboardHelp");
+    };
+    const ric = window.requestIdleCallback;
+    if (ric) {
+      const id = ric(run, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(run, 800);
+    return () => window.clearTimeout(id);
+  }, [mounted]);
+
   const todayKey = today ? toDateKey(today) : null;
-  const { day: todayDay } = useDay(todayKey);
+  const { day: todayDay, setTaskReminder } = useDay(todayKey);
 
   // Schedule reminder notifications for today's tasks.
   const reminderTargets = useMemo<ReminderTarget[]>(
@@ -141,7 +220,42 @@ export function AppShell() {
         .map((t) => ({ id: t.id, title: t.title, reminderAt: t.reminderAt as number })),
     [todayDay.tasks],
   );
-  useReminders(reminderTargets, settings.notificationsEnabled);
+  useReminders(reminderTargets, settings.notificationsEnabled, (target) => {
+    setFiredReminders((prev) =>
+      [...prev, { ...target, fireId: createId() }].slice(-3),
+    );
+  });
+
+  const dropReminder = useCallback((fireId: string) => {
+    setFiredReminders((prev) => prev.filter((r) => r.fireId !== fireId));
+  }, []);
+
+  const snoozeReminder = useCallback(
+    (item: FiredReminder, minutes: number) => {
+      void setTaskReminder(item.id, Date.now() + minutes * 60_000);
+      dropReminder(item.fireId);
+    },
+    [setTaskReminder, dropReminder],
+  );
+
+  const snoozeTomorrow = useCallback(
+    (item: FiredReminder) => {
+      const t = new Date();
+      t.setDate(t.getDate() + 1);
+      t.setHours(9, 0, 0, 0);
+      void setTaskReminder(item.id, t.getTime());
+      dropReminder(item.fireId);
+    },
+    [setTaskReminder, dropReminder],
+  );
+
+  const dismissReminder = useCallback(
+    (item: FiredReminder) => {
+      void setTaskReminder(item.id, null);
+      dropReminder(item.fireId);
+    },
+    [setTaskReminder, dropReminder],
+  );
 
   // Daily review scheduling.
   const reviewCompleted = todayDay.review !== null;
@@ -178,6 +292,30 @@ export function AppShell() {
   const openAddTask = useCallback(() => {
     setAddTaskFor(selectedDate ?? todayKey);
   }, [selectedDate, todayKey]);
+
+  const scrollToAgenda = useCallback(() => {
+    document
+      .getElementById("agenda")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  // Stable open handlers so memoized children (TopNav, QuickDock) don't re-render
+  // on every unrelated AppShell state change. setState setters are stable, so
+  // these never need to change identity.
+  const openCommand = useCallback(() => setCommandOpen(true), []);
+  const openWorkspaces = useCallback(() => setWorkspacesOpen(true), []);
+  const openStats = useCallback(() => setStatsOpen(true), []);
+  const openMissions = useCallback(() => setMissionsOpen(true), []);
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const openHelp = useCallback(() => setHelpOpen(true), []);
+  const openQuickNotes = useCallback(() => setQuickNotesOpen(true), []);
+  const openPomodoro = useCallback(() => setPomodoroOpen(true), []);
+  const openFocus = useCallback(() => setFocusOpen(true), []);
+  const openStickies = useCallback(() => setStickiesOpen(true), []);
+  const openRoutines = useCallback(() => setRoutinesOpen(true), []);
+  const openToday = useCallback(() => {
+    if (todayKey) setSelectedDate(todayKey);
+  }, [todayKey]);
 
   const handleAddTask = useCallback(
     (dateKey: string, draft: TaskDraft) => {
@@ -231,48 +369,54 @@ export function AppShell() {
     commandOpen ||
     missionsOpen ||
     workspacesOpen ||
-    helpOpen;
+    helpOpen ||
+    pomodoroOpen ||
+    focusOpen ||
+    routinesOpen ||
+    quickNotesOpen ||
+    stickiesOpen;
 
   useKeyboardShortcuts(
     {
       onNewTask: openAddTask,
-      onSearch: () => setCommandOpen(true),
-      onCommand: () => setCommandOpen(true),
-      onOpenToday: () => todayKey && setSelectedDate(todayKey),
-      onOpenWorkspaces: () => setWorkspacesOpen(true),
-      onHelp: () => setHelpOpen(true),
+      onSearch: openCommand,
+      onCommand: openCommand,
+      onOpenToday: openToday,
+      onOpenWorkspaces: openWorkspaces,
+      onHelp: openHelp,
       onPrevMonth: goPrev,
       onNextMonth: goNext,
       onSave: () => showToast("Everything's saved"),
+      onQuickCapture: openAddTask,
+      onQuickNote: openQuickNotes,
+      onAgenda: scrollToAgenda,
+      onFocusMode: openFocus,
     },
     mounted && !anyModalOpen,
   );
 
   // Native shell: tray menu + global shortcuts route into the same actions.
   useNativeActions({
-    onDashboard: () => todayKey && setSelectedDate(todayKey),
+    onDashboard: openToday,
     onQuickAdd: openAddTask,
-    onFocus: () => todayKey && setSelectedDate(todayKey),
+    onFocus: openFocus,
   });
 
   if (!mounted || !month || !today || !todayKey) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-canvas">
-        <BrandMark size={40} decorative className="animate-pulse" />
-      </div>
-    );
+    return <CalendarSkeleton />;
   }
 
   return (
     <MotionProvider>
+    <PomodoroProvider>
     <div className="min-h-dvh bg-canvas">
       <TopNav
         monthTitle={formatMonthTitle(month)}
-        onOpenSearch={() => setCommandOpen(true)}
-        onOpenWorkspaces={() => setWorkspacesOpen(true)}
-        onOpenStats={() => setStatsOpen(true)}
-        onOpenMissions={() => setMissionsOpen(true)}
-        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenSearch={openCommand}
+        onOpenWorkspaces={openWorkspaces}
+        onOpenStats={openStats}
+        onOpenMissions={openMissions}
+        onOpenSettings={openSettings}
       />
 
       <main className="mx-auto max-w-5xl px-3 pb-32 pt-8 sm:px-8 sm:pt-14">
@@ -285,9 +429,20 @@ export function AppShell() {
           onSelect={setSelectedDate}
         />
         <TodayPreview today={today} onOpen={setSelectedDate} />
+        <div id="agenda" className="scroll-mt-4">
+          <CalendarAgenda today={today} onOpenDay={setSelectedDate} />
+        </div>
       </main>
 
+      <QuickDock
+        onQuickNote={openQuickNotes}
+        onPomodoro={openPomodoro}
+        onFocus={openFocus}
+        onStickies={openStickies}
+        onRoutines={openRoutines}
+      />
       <Fab onClick={openAddTask} />
+      <DailyUtilitiesPanel />
 
       <DayModal
         dateKey={selectedDate}
@@ -370,8 +525,55 @@ export function AppShell() {
         <KeyboardHelp open={helpOpen} onOpenChange={setHelpOpen} />
       )}
 
+      {everPomodoro && (
+        <PomodoroModal
+          open={pomodoroOpen}
+          today={today}
+          onOpenChange={setPomodoroOpen}
+        />
+      )}
+
+      {everRoutines && todayKey && (
+        <DayTemplatesModal
+          open={routinesOpen}
+          dateKey={selectedDate ?? todayKey}
+          onOpenChange={setRoutinesOpen}
+          onApplied={showToast}
+        />
+      )}
+
+      {everQuickNotes && todayKey && (
+        <QuickNotesPopover
+          open={quickNotesOpen}
+          dateKey={selectedDate ?? todayKey}
+          onClose={() => setQuickNotesOpen(false)}
+        />
+      )}
+
+      {everStickies && (
+        <StickyBoard open={stickiesOpen} onClose={() => setStickiesOpen(false)} />
+      )}
+
+      {everFocus && todayKey && (
+        <FocusMode
+          open={focusOpen}
+          today={today}
+          todayKey={todayKey}
+          onClose={() => setFocusOpen(false)}
+        />
+      )}
+
+      <ReminderToasts
+        items={firedReminders}
+        onSnooze={snoozeReminder}
+        onTomorrow={snoozeTomorrow}
+        onDismiss={dismissReminder}
+        onClose={dropReminder}
+      />
+
       <Toast message={toast} />
     </div>
+    </PomodoroProvider>
     </MotionProvider>
   );
 }

@@ -333,7 +333,7 @@ function MissionCard({
             type="button"
             aria-label={mission.archived ? "Unarchive" : "Archive"}
             onClick={() => setArchived(mission.id, !mission.archived)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted/60 transition-colors hover:bg-black/[0.05] hover:text-ink"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted/60 transition-colors hover:bg-fill/[0.05] hover:text-ink"
           >
             {mission.archived ? (
               <ArchiveRestore className="h-4 w-4" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export interface ShortcutHandlers {
   onNewTask: () => void;
@@ -10,12 +10,20 @@ export interface ShortcutHandlers {
   onSave: () => void;
   /** Ctrl/⌘+K — universal command palette. Works everywhere. */
   onCommand: () => void;
-  /** T — open today's workspace. */
+  /** T / Ctrl+1 — open today's workspace. */
   onOpenToday: () => void;
   /** W — open the Workspace OS hub. */
   onOpenWorkspaces: () => void;
   /** ? — show the keyboard shortcuts cheat-sheet. */
   onHelp: () => void;
+  /** Ctrl/⌘+Shift+Space — quick capture a task. */
+  onQuickCapture: () => void;
+  /** Ctrl/⌘+Alt/⌥+N — open quick notes. */
+  onQuickNote: () => void;
+  /** Ctrl/⌘+2 — jump to the agenda. */
+  onAgenda: () => void;
+  /** Ctrl/⌘+3 — enter focus mode. */
+  onFocusMode: () => void;
 }
 
 /** True when focus is in a text-entry field, where global keys should pass through. */
@@ -44,8 +52,16 @@ export function useKeyboardShortcuts(
   handlers: ShortcutHandlers,
   active: boolean,
 ): void {
+  // Keep the latest handlers in a ref so the global listener is bound once (per
+  // `active` change) instead of being torn down and re-added on every render —
+  // callers pass a fresh handlers object each render and that's fine.
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // Read the freshest handlers on each event.
+      const handlers = handlersRef.current;
       // Ctrl/Cmd+S works everywhere.
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
@@ -53,11 +69,47 @@ export function useKeyboardShortcuts(
         return;
       }
 
-      // Ctrl/Cmd+K — universal search — works everywhere too.
+      // Ctrl/Cmd+K — command palette — works everywhere too.
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         handlers.onCommand();
         return;
+      }
+
+      // Chord shortcuts (with modifiers) work globally, like ⌘K/⌘S.
+      const mod = e.metaKey || e.ctrlKey;
+
+      // Ctrl/⌘+Shift+Space — quick capture.
+      if (mod && e.shiftKey && (e.code === "Space" || e.key === " ")) {
+        e.preventDefault();
+        handlers.onQuickCapture();
+        return;
+      }
+
+      // Ctrl/⌘+Alt/⌥+N — quick note.
+      if (mod && e.altKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        handlers.onQuickNote();
+        return;
+      }
+
+      // Ctrl/⌘+1 / 2 / 3 — today / agenda / focus mode.
+      if (mod && !e.shiftKey && !e.altKey) {
+        if (e.key === "1") {
+          e.preventDefault();
+          handlers.onOpenToday();
+          return;
+        }
+        if (e.key === "2") {
+          e.preventDefault();
+          handlers.onAgenda();
+          return;
+        }
+        if (e.key === "3") {
+          e.preventDefault();
+          handlers.onFocusMode();
+          return;
+        }
       }
 
       if (!active || isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey) {
@@ -101,5 +153,5 @@ export function useKeyboardShortcuts(
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handlers, active]);
+  }, [active]);
 }
