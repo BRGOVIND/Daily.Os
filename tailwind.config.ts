@@ -15,21 +15,26 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // Base canvas carries a soft baby-pink warmth; cards stay pure white.
-        canvas: "#FCF4F7",
-        card: "#FFFFFF",
+        // Every surface token is a CSS variable (space-separated RGB channels
+        // for alpha support) so the whole palette re-themes at runtime from
+        // Settings — light "Blossom", elegant charcoal "Dark", "Warm Paper".
+        canvas: "rgb(var(--canvas) / <alpha-value>)",
+        card: "rgb(var(--card) / <alpha-value>)",
         ink: {
-          DEFAULT: "#141115",
-          muted: "#6B646A",
+          DEFAULT: "rgb(var(--ink) / <alpha-value>)",
+          muted: "rgb(var(--ink-muted) / <alpha-value>)",
         },
-        line: "#F0E6EB",
-        // Accent is a CSS variable so it can be re-themed at runtime from
-        // Settings. Channels are space-separated RGB for alpha support.
+        line: "rgb(var(--line) / <alpha-value>)",
+        // Subtle surface fill: near-black on light themes, near-white on dark —
+        // so `bg-fill/[0.05]` reads correctly in every theme.
+        fill: "rgb(var(--fill) / <alpha-value>)",
+        // Overlay scrim — always dark, regardless of theme (backdrops, toasts).
+        scrim: "rgb(var(--scrim) / <alpha-value>)",
         accent: {
           DEFAULT: "rgb(var(--accent) / <alpha-value>)",
           hover: "rgb(var(--accent-hover) / <alpha-value>)",
         },
-        success: "#3FA66B",
+        success: "rgb(var(--success) / <alpha-value>)",
         warning: "#F0B429",
         alert: "#E5484D",
       },
@@ -62,8 +67,9 @@ const config: Config = {
         "3xl": "1.75rem",
       },
       boxShadow: {
-        soft: "0 1px 2px rgba(17,17,17,0.04), 0 8px 24px rgba(17,17,17,0.04)",
-        lift: "0 2px 4px rgba(17,17,17,0.04), 0 18px 48px rgba(17,17,17,0.10)",
+        // Theme-driven so shadows deepen appropriately on dark/paper surfaces.
+        soft: "var(--shadow-soft)",
+        lift: "var(--shadow-lift)",
         glow: "0 8px 30px rgb(var(--accent) / 0.28)",
       },
       keyframes: {

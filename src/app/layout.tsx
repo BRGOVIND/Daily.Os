@@ -33,6 +33,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Restore the saved theme before first paint to avoid a flash of the
+            default light palette. Mirrors localStorage written by applyTheme. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('daily-os-theme');if(t==='dark'||t==='paper'){var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=(t==='dark'?'dark':'light');var c=(t==='dark'?'#17171B':'#F4EDE0');var m=document.querySelector('meta[name=\"theme-color\"]');if(m)m.setAttribute('content',c);}}catch(e){}})();",
+          }}
+        />
+      </head>
       <body className="min-h-dvh bg-canvas text-ink">
         {children}
         <PwaController />

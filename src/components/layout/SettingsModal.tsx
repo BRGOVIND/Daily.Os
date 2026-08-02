@@ -13,7 +13,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { db } from "@/lib/db";
-import { APP_NAME, ACCENTS } from "@/lib/constants";
+import { APP_NAME, ACCENTS, THEMES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
   notificationPermission,
@@ -80,6 +80,66 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         </header>
 
         <ProfilesSection />
+
+        {/* Theme */}
+        <section className="flex flex-col gap-3">
+          <Label className="flex items-center gap-1.5">
+            <Palette className="h-3.5 w-3.5" /> Theme
+          </Label>
+          <div className="grid grid-cols-3 gap-2.5">
+            {THEMES.map((t) => {
+              const active = settings.theme === t.key;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => update({ theme: t.key })}
+                  aria-pressed={active}
+                  className={cn(
+                    "group flex flex-col gap-2 rounded-2xl border p-2.5 text-left transition-all",
+                    active
+                      ? "border-accent ring-2 ring-accent/30"
+                      : "border-line hover:border-ink/20",
+                  )}
+                >
+                  {/* Mini preview */}
+                  <span
+                    className="relative flex h-12 w-full items-end gap-1 overflow-hidden rounded-lg p-1.5"
+                    style={{ backgroundColor: t.swatch.canvas }}
+                  >
+                    <span
+                      className="h-full flex-1 rounded-md shadow-sm"
+                      style={{ backgroundColor: t.swatch.card }}
+                    />
+                    <span className="flex flex-1 flex-col gap-1">
+                      <span
+                        className="h-1.5 w-full rounded-full"
+                        style={{ backgroundColor: t.swatch.ink, opacity: 0.85 }}
+                      />
+                      <span
+                        className="h-1.5 w-2/3 rounded-full"
+                        style={{ backgroundColor: t.swatch.ink, opacity: 0.4 }}
+                      />
+                    </span>
+                    {active && (
+                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-white">
+                        <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                      </span>
+                    )}
+                  </span>
+                  <span className="px-0.5">
+                    <span className="block text-[13px] font-semibold text-ink">
+                      {t.label}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-tight text-ink-muted">
+                      {t.description}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
         {/* Accent */}
         <section className="flex flex-col gap-3">
@@ -168,17 +228,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
         {/* Desktop (native shell only; renders null on web) */}
         <NativeSection />
-
-        {/* Theme placeholder */}
-        <section className="flex items-center justify-between rounded-2xl border border-line bg-canvas/50 px-4 py-3">
-          <div>
-            <p className="text-[15px] font-medium text-ink">Dark theme</p>
-            <p className="text-sm text-ink-muted">Coming soon.</p>
-          </div>
-          <span className="rounded-full bg-canvas px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted">
-            Soon
-          </span>
-        </section>
 
         {/* Danger zone */}
         <section className="rounded-2xl border border-line p-4">

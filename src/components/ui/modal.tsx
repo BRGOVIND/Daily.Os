@@ -57,7 +57,7 @@ export function Modal({
           <Dialog.Portal forceMount>
             <Dialog.Overlay asChild forceMount>
               <motion.div
-                className="fixed inset-0 z-50 bg-ink/20 backdrop-blur-[2px]"
+                className="fixed inset-0 z-50 bg-scrim/20 backdrop-blur-[2px]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -118,7 +118,7 @@ export function Modal({
                   {showClose && (
                     <Dialog.Close
                       aria-label="Close"
-                      className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-black/[0.05] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                      className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-fill/[0.05] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                     >
                       <X className="h-5 w-5" />
                     </Dialog.Close>

@@ -74,7 +74,7 @@ export default function WelcomePage() {
               href={REPO_URL}
               target="_blank"
               rel="noreferrer"
-              className="flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-ink-muted transition-colors hover:bg-black/[0.04] hover:text-ink"
+              className="flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-ink-muted transition-colors hover:bg-fill/[0.04] hover:text-ink"
             >
               <Github className="h-4 w-4" /> GitHub
             </a>

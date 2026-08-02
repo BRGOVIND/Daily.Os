@@ -14,7 +14,7 @@ const buttonVariants = cva(
           "bg-accent text-white shadow-soft hover:bg-accent-hover hover:shadow-glow",
         secondary:
           "bg-card text-ink border border-line hover:border-ink/20 hover:bg-canvas",
-        ghost: "text-ink-muted hover:bg-black/[0.04] hover:text-ink",
+        ghost: "text-ink-muted hover:bg-fill/[0.04] hover:text-ink",
         danger:
           "bg-transparent text-ink-muted hover:bg-accent/10 hover:text-accent",
       },

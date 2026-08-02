@@ -28,7 +28,9 @@ export function ProgressRing({
   stroke = 3,
   color,
   colorTo,
-  trackColor = "#ECECEC",
+  // Theme-neutral translucent track: reads as a soft grey on light themes and a
+  // subtle light ring on dark. (SVG attrs can't resolve CSS var(), so a literal.)
+  trackColor = "rgba(130,130,130,0.18)",
   shadow = false,
   children,
 }: ProgressRingProps) {
