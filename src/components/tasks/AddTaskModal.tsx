@@ -3,12 +3,13 @@
 import { Modal } from "@/components/ui/modal";
 import { TaskForm } from "./TaskForm";
 import { fromDateKey, formatDayHeader } from "@/lib/date";
-import type { TaskDraft, Template } from "@/types";
+import type { Mission, TaskDraft, Template } from "@/types";
 
 interface AddTaskModalProps {
   open: boolean;
   dateKey: string | null;
   templates: Template[];
+  missions?: Mission[];
   onOpenChange: (open: boolean) => void;
   onSubmit: (draft: TaskDraft) => void;
   onUseTemplate: (template: Template) => void;
@@ -19,6 +20,7 @@ export function AddTaskModal({
   open,
   dateKey,
   templates,
+  missions,
   onOpenChange,
   onSubmit,
   onUseTemplate,
@@ -42,6 +44,7 @@ export function AddTaskModal({
         dateLabel={label}
         targetDate={targetDate}
         templates={templates}
+        missions={missions}
         onUseTemplate={(t) => {
           onUseTemplate(t);
           onOpenChange(false);

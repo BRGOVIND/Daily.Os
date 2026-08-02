@@ -1,4 +1,7 @@
-/** Thin, SSR-safe wrapper around the browser Notification API. */
+/** Thin, SSR-safe wrapper around notifications — native (Tauri) when available,
+ * otherwise the browser Notification API. */
+
+import { isTauri, nativeNotify } from "@/lib/native/native";
 
 export function notificationsSupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window;
@@ -20,8 +23,20 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 }
 
-/** Fire a notification if permitted; a no-op otherwise. */
+/** Fire a notification via the OS (native shell) when possible, else the
+ * browser API. Safe no-op if neither is permitted. */
 export function showNotification(title: string, body?: string): void {
+  if (isTauri()) {
+    // Prefer a real OS notification; fall back to the browser if it fails.
+    void nativeNotify(title, body).then((shown) => {
+      if (!shown) browserNotification(title, body);
+    });
+    return;
+  }
+  browserNotification(title, body);
+}
+
+function browserNotification(title: string, body?: string): void {
   if (!notificationsSupported() || Notification.permission !== "granted") return;
   try {
     new Notification(title, {

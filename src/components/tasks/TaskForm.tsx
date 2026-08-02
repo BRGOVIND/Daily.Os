@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Bell, Repeat } from "lucide-react";
+import { Bell, CalendarClock, Gauge, Repeat, Rocket, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,18 @@ import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
   CATEGORIES,
+  DIFFICULTY_OPTIONS,
+  ENERGY_OPTIONS,
+  ESTIMATE_OPTIONS,
   PRIORITIES,
   RECURRENCE_OPTIONS,
   REMINDER_OPTIONS,
   TASK_COLORS,
 } from "@/lib/constants";
 import type {
+  Difficulty,
+  EnergyLevel,
+  Mission,
   Priority,
   RecurrenceRule,
   TaskColor,
@@ -30,6 +36,7 @@ interface TaskFormProps {
   onCancel: () => void;
   onUseTemplate: (template: Template) => void;
   templates: Template[];
+  missions?: Mission[];
   dateLabel: string;
   targetDate: Date;
 }
@@ -42,7 +49,27 @@ const DEFAULTS: TaskDraft = {
   notes: "",
   recurrence: "none",
   reminderAt: null,
+  // Smart metadata — all optional; the engine defaults anything left unset.
+  estimatedMinutes: undefined,
+  energy: undefined,
+  difficulty: undefined,
+  deadline: null,
+  missionId: null,
 };
+
+/** Normalize a raw form draft: drop empty/NaN smart fields to undefined/null. */
+function cleanDraft(draft: TaskDraft): TaskDraft {
+  const minutes = draft.estimatedMinutes;
+  return {
+    ...draft,
+    estimatedMinutes:
+      typeof minutes === "number" && !Number.isNaN(minutes) && minutes > 0
+        ? minutes
+        : undefined,
+    deadline: draft.deadline && draft.deadline.length > 0 ? draft.deadline : null,
+    missionId: draft.missionId && draft.missionId.length > 0 ? draft.missionId : null,
+  };
+}
 
 /** Compute an absolute reminder timestamp from the chosen quick-pick. */
 function computeReminderAt(
@@ -67,6 +94,7 @@ export function TaskForm({
   onCancel,
   onUseTemplate,
   templates,
+  missions = [],
   dateLabel,
   targetDate,
 }: TaskFormProps) {
@@ -78,6 +106,8 @@ export function TaskForm({
     formState: { errors, isSubmitting },
   } = useForm<TaskDraft>({ defaultValues: DEFAULTS });
 
+  const activeMissions = missions.filter((m) => !m.archived);
+
   const [reminderKey, setReminderKey] = useState("none");
   const [reminderTime, setReminderTime] = useState("09:00");
 
@@ -88,7 +118,7 @@ export function TaskForm({
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit((d) => onSubmit(cleanDraft(d)))}
       className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-y-auto p-6 sm:p-8"
     >
       <header>
@@ -178,6 +208,142 @@ export function TaskForm({
             )}
           />
         </div>
+      </div>
+
+      {/* Smart details — optional metadata the Intelligence Engine uses to
+          prioritise and plan. Everything here is safe to leave blank. */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-canvas/50 p-3.5">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted/80">
+          Smart details · optional
+        </p>
+
+        {/* Estimate */}
+        <div className="flex flex-col gap-2">
+          <Label className="flex items-center gap-1.5">
+            <Timer className="h-3.5 w-3.5" /> Estimated time
+          </Label>
+          <Controller
+            control={control}
+            name="estimatedMinutes"
+            render={({ field }) => (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {ESTIMATE_OPTIONS.map((o) => (
+                  <PillToggle
+                    key={o.minutes}
+                    label={o.label}
+                    active={field.value === o.minutes}
+                    onSelect={() =>
+                      field.onChange(
+                        field.value === o.minutes ? undefined : o.minutes,
+                      )
+                    }
+                  />
+                ))}
+                <input
+                  type="number"
+                  min={0}
+                  step={5}
+                  inputMode="numeric"
+                  placeholder="min"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? undefined : Number(e.target.value),
+                    )
+                  }
+                  className="h-9 w-20 rounded-lg border border-line bg-card px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+                />
+              </div>
+            )}
+          />
+        </div>
+
+        {/* Energy + Difficulty */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label className="flex items-center gap-1.5">
+              <Gauge className="h-3.5 w-3.5" /> Energy
+            </Label>
+            <Controller
+              control={control}
+              name="energy"
+              render={({ field }) => (
+                <div className="flex flex-wrap gap-1.5">
+                  {ENERGY_OPTIONS.map((o) => (
+                    <PillToggle
+                      key={o.key}
+                      label={o.label}
+                      active={field.value === o.key}
+                      onSelect={() =>
+                        field.onChange(
+                          field.value === o.key ? undefined : (o.key as EnergyLevel),
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label>Difficulty</Label>
+            <Controller
+              control={control}
+              name="difficulty"
+              render={({ field }) => (
+                <div className="flex flex-wrap gap-1.5">
+                  {DIFFICULTY_OPTIONS.map((o) => (
+                    <PillToggle
+                      key={o.key}
+                      label={o.label}
+                      active={field.value === o.key}
+                      onSelect={() =>
+                        field.onChange(
+                          field.value === o.key
+                            ? undefined
+                            : (o.key as Difficulty),
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Deadline */}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="deadline" className="flex items-center gap-1.5">
+            <CalendarClock className="h-3.5 w-3.5" /> Deadline
+          </Label>
+          <input
+            id="deadline"
+            type="date"
+            {...register("deadline")}
+            className="h-9 w-full max-w-[12rem] rounded-lg border border-line bg-card px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+          />
+        </div>
+
+        {/* Mission link */}
+        {activeMissions.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="missionId" className="flex items-center gap-1.5">
+              <Rocket className="h-3.5 w-3.5" /> Mission
+            </Label>
+            <Select
+              id="missionId"
+              options={[
+                { value: "", label: "No mission" },
+                ...activeMissions.map((m) => ({
+                  value: m.id,
+                  label: `${m.icon} ${m.title}`,
+                })),
+              ]}
+              {...register("missionId")}
+            />
+          </div>
+        )}
       </div>
 
       {/* Recurrence */}

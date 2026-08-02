@@ -18,6 +18,8 @@ interface TaskListProps {
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
+  /** Today's date key — passed through so items can show calculated priority. */
+  today?: string;
 }
 
 function matches(task: Task, filter: TaskFilter): boolean {
@@ -28,7 +30,13 @@ function matches(task: Task, filter: TaskFilter): boolean {
 }
 
 /** Ordered, filterable task list — completed items animate to the bottom. */
-export function TaskList({ tasks, onToggle, onDelete, onAdd }: TaskListProps) {
+export function TaskList({
+  tasks,
+  onToggle,
+  onDelete,
+  onAdd,
+  today,
+}: TaskListProps) {
   const [filter, setFilter] = useState<TaskFilter>(DEFAULT_FILTER);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -130,6 +138,7 @@ export function TaskList({ tasks, onToggle, onDelete, onAdd }: TaskListProps) {
                 task={task}
                 onToggle={onToggle}
                 onDelete={onDelete}
+                today={today}
               />
             ))}
           </AnimatePresence>

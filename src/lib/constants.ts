@@ -1,14 +1,19 @@
 import type {
   AccentKey,
+  Difficulty,
+  EnergyLevel,
+  Mood,
+  NoteBlockType,
   Priority,
   RecurrenceRule,
+  ResourceKind,
   TaskColor,
   Template,
 } from "@/types";
 
 export const APP_NAME = "Daily OS";
 export const MAX_FOCUS_ITEMS = 3;
-export const DB_VERSION = 2;
+export const DB_VERSION = 4;
 
 /** Date-key format used for the Dexie primary key and all lookups. */
 export const DATE_KEY_FORMAT = "yyyy-MM-dd";
@@ -46,6 +51,28 @@ export const PRIORITY_WEIGHT: Record<Priority, number> = {
   medium: 1,
   low: 2,
 };
+
+/** Energy-level quick-picks for the smart task composer (Phase 4). */
+export const ENERGY_OPTIONS: { key: EnergyLevel; label: string }[] = [
+  { key: "low", label: "Low" },
+  { key: "medium", label: "Medium" },
+  { key: "high", label: "High" },
+];
+
+/** Difficulty quick-picks for the smart task composer (Phase 4). */
+export const DIFFICULTY_OPTIONS: { key: Difficulty; label: string }[] = [
+  { key: "easy", label: "Easy" },
+  { key: "medium", label: "Medium" },
+  { key: "hard", label: "Hard" },
+];
+
+/** Estimated-duration quick-picks (minutes). */
+export const ESTIMATE_OPTIONS: { minutes: number; label: string }[] = [
+  { minutes: 15, label: "15m" },
+  { minutes: 30, label: "30m" },
+  { minutes: 60, label: "1h" },
+  { minutes: 120, label: "2h" },
+];
 
 export const CATEGORIES: string[] = [
   "Personal",
@@ -213,6 +240,74 @@ export const DEFAULT_TEMPLATES: SeedTemplate[] = [
     ],
   },
 ];
+
+// ─── Workspace OS (Phase 5) ─────────────────────────────────────────────────
+
+/** Seed id for the default workspace created on first run. */
+export const DEFAULT_WORKSPACE_ID = "ws-default";
+
+/** Emoji palette offered when creating a workspace. */
+export const WORKSPACE_ICONS = [
+  "🗂️", "🚀", "🎯", "🎓", "🌍", "💼", "🧪", "💡",
+  "🏋️", "💰", "📚", "🏡", "🎨", "🧠", "⚡", "🌱",
+];
+
+/** Note-block kinds shown in the editor's insert menu. */
+export const NOTE_BLOCK_OPTIONS: {
+  type: NoteBlockType;
+  label: string;
+  hint: string;
+}[] = [
+  { type: "text", label: "Text", hint: "Plain paragraph" },
+  { type: "heading", label: "Heading", hint: "Section title" },
+  { type: "bullet", label: "Bullet", hint: "List item" },
+  { type: "checkbox", label: "Checkbox", hint: "Task to tick off" },
+  { type: "quote", label: "Quote", hint: "Callout / citation" },
+  { type: "code", label: "Code", hint: "Monospace block" },
+];
+
+/** Resource kinds with a label and emoji glyph for the library. */
+export const RESOURCE_KINDS: {
+  kind: ResourceKind;
+  label: string;
+  icon: string;
+}[] = [
+  { kind: "link", label: "Link", icon: "🔗" },
+  { kind: "article", label: "Article", icon: "📄" },
+  { kind: "video", label: "Video", icon: "🎬" },
+  { kind: "repo", label: "Repository", icon: "🐙" },
+  { kind: "pdf", label: "PDF", icon: "📘" },
+  { kind: "image", label: "Image", icon: "🖼️" },
+  { kind: "book", label: "Book", icon: "📚" },
+];
+
+export const RESOURCE_KIND_MAP: Record<
+  ResourceKind,
+  { label: string; icon: string }
+> = RESOURCE_KINDS.reduce(
+  (acc, r) => ({ ...acc, [r.kind]: { label: r.label, icon: r.icon } }),
+  {} as Record<ResourceKind, { label: string; icon: string }>,
+);
+
+/** Mood grades captured in the journal, worst→best ordering by score. */
+export const MOOD_OPTIONS: {
+  key: Mood;
+  label: string;
+  emoji: string;
+  score: number;
+}[] = [
+  { key: "great", label: "Great", emoji: "🤩", score: 5 },
+  { key: "good", label: "Good", emoji: "🙂", score: 4 },
+  { key: "okay", label: "Okay", emoji: "😐", score: 3 },
+  { key: "low", label: "Low", emoji: "😔", score: 2 },
+  { key: "rough", label: "Rough", emoji: "😣", score: 1 },
+];
+
+export const MOOD_MAP: Record<Mood, { label: string; emoji: string; score: number }> =
+  MOOD_OPTIONS.reduce(
+    (acc, m) => ({ ...acc, [m.key]: { label: m.label, emoji: m.emoji, score: m.score } }),
+    {} as Record<Mood, { label: string; emoji: string; score: number }>,
+  );
 
 /** Suggested habits offered when the user has none yet. */
 export const SUGGESTED_HABITS: { name: string; color: TaskColor }[] = [

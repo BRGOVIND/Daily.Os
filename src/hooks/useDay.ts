@@ -81,9 +81,17 @@ export function useDay(date: string | null): UseDayResult {
     (id: string) =>
       mutate((d) => ({
         ...d,
-        tasks: d.tasks.map((t) =>
-          t.id === id ? { ...t, completed: !t.completed } : t,
-        ),
+        tasks: d.tasks.map((t) => {
+          if (t.id !== id) return t;
+          const completed = !t.completed;
+          // Stamp the completion time so energy/time analysis has a signal;
+          // clear it when a task is un-checked.
+          return {
+            ...t,
+            completed,
+            completedAt: completed ? Date.now() : null,
+          };
+        }),
       })),
     [mutate],
   );

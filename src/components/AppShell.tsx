@@ -15,8 +15,8 @@ import { BrandMark } from "@/components/ui/BrandMark";
 const SettingsModal = dynamic(() =>
   import("@/components/layout/SettingsModal").then((m) => m.SettingsModal),
 );
-const SearchOverlay = dynamic(() =>
-  import("@/components/search/SearchOverlay").then((m) => m.SearchOverlay),
+const CommandPalette = dynamic(() =>
+  import("@/components/workspace/CommandPalette").then((m) => m.CommandPalette),
 );
 const StatsModal = dynamic(() =>
   import("@/components/stats/StatsModal").then((m) => m.StatsModal),
@@ -24,12 +24,26 @@ const StatsModal = dynamic(() =>
 const DailyReviewModal = dynamic(() =>
   import("@/components/review/DailyReviewModal").then((m) => m.DailyReviewModal),
 );
+const MissionsModal = dynamic(() =>
+  import("@/components/missions/MissionsModal").then((m) => m.MissionsModal),
+);
+const WorkspacesModal = dynamic(() =>
+  import("@/components/workspace/WorkspacesModal").then((m) => m.WorkspacesModal),
+);
+const KeyboardHelp = dynamic(() =>
+  import("@/components/layout/KeyboardHelp").then((m) => m.KeyboardHelp),
+);
+import { MotionProvider } from "@/components/providers/MotionProvider";
 import { useDay } from "@/hooks/useDay";
+import { useMissions } from "@/hooks/useMissions";
+import { useWorkspaces } from "@/hooks/useWorkspaces";
+import type { SearchHit } from "@/workspace";
 import { useSettings } from "@/hooks/useSettings";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useReminders, type ReminderTarget } from "@/hooks/useReminders";
 import { useDailyReview } from "@/hooks/useDailyReview";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useNativeActions } from "@/hooks/useNativeActions";
 import { ensureSeeded } from "@/lib/db";
 import { commitTask, applyTemplateToDay } from "@/lib/commitTask";
 import {
@@ -67,17 +81,25 @@ export function AppShell() {
   const [reviewFor, setReviewFor] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [missionsOpen, setMissionsOpen] = useState(false);
+  const [workspacesOpen, setWorkspacesOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const { settings } = useSettings();
   const { templates } = useTemplates();
+  const { missions } = useMissions();
+  const { setActive: setActiveWorkspace } = useWorkspaces();
 
   // Latch each occasional modal's first open so its lazy chunk loads on demand
   // but stays mounted afterwards (preserving open/close animations).
   const everSettings = useLatch(settingsOpen);
   const everStats = useLatch(statsOpen);
-  const everSearch = useLatch(searchOpen);
+  const everCommand = useLatch(commandOpen);
+  const everMissions = useLatch(missionsOpen);
+  const everWorkspaces = useLatch(workspacesOpen);
+  const everHelp = useLatch(helpOpen);
   const everReview = useLatch(reviewFor !== null);
 
   // Resolve "now" on the client only to avoid SSR/CSR hydration drift, and seed.
@@ -171,6 +193,25 @@ export function AppShell() {
     [],
   );
 
+  // Route a universal-search hit to the right surface.
+  const handleSearchSelect = useCallback(
+    (hit: SearchHit) => {
+      if (hit.date) {
+        setSelectedDate(hit.date);
+        return;
+      }
+      if (hit.category === "missions") {
+        setMissionsOpen(true);
+        return;
+      }
+      if (hit.workspaceId) {
+        void setActiveWorkspace(hit.workspaceId);
+      }
+      setWorkspacesOpen(true);
+    },
+    [setActiveWorkspace],
+  );
+
   const planTomorrow = useCallback(
     (tomorrowKey: string) => {
       setReviewFor(null);
@@ -187,18 +228,32 @@ export function AppShell() {
     reviewFor !== null ||
     settingsOpen ||
     statsOpen ||
-    searchOpen;
+    commandOpen ||
+    missionsOpen ||
+    workspacesOpen ||
+    helpOpen;
 
   useKeyboardShortcuts(
     {
       onNewTask: openAddTask,
-      onSearch: () => setSearchOpen(true),
+      onSearch: () => setCommandOpen(true),
+      onCommand: () => setCommandOpen(true),
+      onOpenToday: () => todayKey && setSelectedDate(todayKey),
+      onOpenWorkspaces: () => setWorkspacesOpen(true),
+      onHelp: () => setHelpOpen(true),
       onPrevMonth: goPrev,
       onNextMonth: goNext,
       onSave: () => showToast("Everything's saved"),
     },
     mounted && !anyModalOpen,
   );
+
+  // Native shell: tray menu + global shortcuts route into the same actions.
+  useNativeActions({
+    onDashboard: () => todayKey && setSelectedDate(todayKey),
+    onQuickAdd: openAddTask,
+    onFocus: () => todayKey && setSelectedDate(todayKey),
+  });
 
   if (!mounted || !month || !today || !todayKey) {
     return (
@@ -209,15 +264,18 @@ export function AppShell() {
   }
 
   return (
+    <MotionProvider>
     <div className="min-h-dvh bg-canvas">
       <TopNav
         monthTitle={formatMonthTitle(month)}
-        onOpenSearch={() => setSearchOpen(true)}
+        onOpenSearch={() => setCommandOpen(true)}
+        onOpenWorkspaces={() => setWorkspacesOpen(true)}
         onOpenStats={() => setStatsOpen(true)}
+        onOpenMissions={() => setMissionsOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
       />
 
-      <main className="mx-auto max-w-5xl px-5 pb-32 pt-10 sm:px-8 sm:pt-14">
+      <main className="mx-auto max-w-5xl px-3 pb-32 pt-8 sm:px-8 sm:pt-14">
         <Calendar
           month={month}
           direction={direction}
@@ -243,6 +301,7 @@ export function AppShell() {
         open={addTaskFor !== null}
         dateKey={addTaskFor}
         templates={templates}
+        missions={missions}
         onOpenChange={(open) => !open && setAddTaskFor(null)}
         onSubmit={(draft) => {
           if (addTaskFor) handleAddTask(addTaskFor, draft);
@@ -252,11 +311,20 @@ export function AppShell() {
         }}
       />
 
-      {everSearch && (
-        <SearchOverlay
-          open={searchOpen}
-          onOpenChange={setSearchOpen}
-          onSelectDay={setSelectedDate}
+      {everCommand && (
+        <CommandPalette
+          open={commandOpen}
+          onOpenChange={setCommandOpen}
+          onSelect={handleSearchSelect}
+        />
+      )}
+
+      {everWorkspaces && (
+        <WorkspacesModal
+          open={workspacesOpen}
+          today={today}
+          onOpenChange={setWorkspacesOpen}
+          onOpenDay={setSelectedDate}
         />
       )}
 
@@ -286,11 +354,24 @@ export function AppShell() {
         />
       )}
 
+      {everMissions && (
+        <MissionsModal
+          open={missionsOpen}
+          today={today}
+          onOpenChange={setMissionsOpen}
+        />
+      )}
+
       {everSettings && (
         <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
       )}
 
+      {everHelp && (
+        <KeyboardHelp open={helpOpen} onOpenChange={setHelpOpen} />
+      )}
+
       <Toast message={toast} />
     </div>
+    </MotionProvider>
   );
 }

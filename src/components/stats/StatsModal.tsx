@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { Modal } from "@/components/ui/modal";
 import { Overview } from "./Overview";
+import { IntelligencePanel } from "./IntelligencePanel";
 import { StatsHeatmap } from "./StatsHeatmap";
 import { Achievements } from "./Achievements";
 import { YearInReview } from "./YearInReview";
@@ -68,6 +69,7 @@ export function StatsModal({
           ) : (
             <>
               <Overview stats={stats} accentHex={accentHex} />
+              <IntelligencePanel today={open ? today : null} />
               <GrowthTree stats={stats} />
               <TrendChart trends={stats.trends} accentHex={accentHex} />
               <StatsHeatmap heatmap={stats.heatmap} onSelectDay={onSelectDay} />

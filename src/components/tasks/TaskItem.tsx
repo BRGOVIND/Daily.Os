@@ -2,22 +2,30 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Bell, Check, Repeat, Trash2 } from "lucide-react";
+import { Bell, Check, Clock, Flag, Repeat, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { COLOR_MAP, RECURRENCE_LABEL } from "@/lib/constants";
+import {
+  computePriority,
+  estMinutes,
+  isOverdue,
+  PRIORITY_BAND_LABEL,
+} from "@/engine";
 import type { Task } from "@/types";
 
 interface TaskItemProps {
   task: Task;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  /** Today's date key — enables the engine's calculated-priority badge. */
+  today?: string;
 }
 
-const PRIORITY_LABEL: Record<Task["priority"], string> = {
-  high: "High",
-  medium: "Medium",
-  low: "Low",
+/** Chip styling per calculated priority band. */
+const BAND_STYLE: Record<"high" | "critical", string> = {
+  critical: "bg-[#E5484D]/12 text-[#C13030]",
+  high: "bg-accent/10 text-accent",
 };
 
 /**
@@ -29,8 +37,16 @@ export const TaskItem = memo(function TaskItem({
   task,
   onToggle,
   onDelete,
+  today,
 }: TaskItemProps) {
   const swatch = COLOR_MAP[task.color];
+
+  // Calculated priority (Intelligence Engine). Only surfaced for actionable
+  // tasks, and only when it's High/Critical — quiet by default.
+  const band = today && !task.completed ? computePriority(task, today).band : null;
+  const showBand = band === "high" || band === "critical";
+  const overdue = today ? isOverdue(task, today) : false;
+  const estimate = task.estimatedMinutes ? estMinutes(task) : null;
 
   return (
     <motion.li
@@ -89,9 +105,26 @@ export const TaskItem = memo(function TaskItem({
           >
             {task.category}
           </span>
-          {task.priority === "high" && !task.completed && (
-            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
-              {PRIORITY_LABEL[task.priority]}
+          {showBand && band && (
+            <span
+              className={cn(
+                "flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                BAND_STYLE[band],
+              )}
+            >
+              <Flag className="h-2.5 w-2.5" />
+              {PRIORITY_BAND_LABEL[band]}
+            </span>
+          )}
+          {estimate && !task.completed && (
+            <span className="flex items-center gap-1 rounded-full bg-canvas px-2 py-0.5 text-[11px] font-medium text-ink-muted">
+              <Clock className="h-2.5 w-2.5" />
+              {estimate}m
+            </span>
+          )}
+          {overdue && (
+            <span className="rounded-full bg-[#E5484D]/12 px-2 py-0.5 text-[11px] font-medium text-[#C13030]">
+              Overdue
             </span>
           )}
           {task.recurrence !== "none" && (

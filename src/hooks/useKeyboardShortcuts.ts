@@ -8,6 +8,14 @@ export interface ShortcutHandlers {
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onSave: () => void;
+  /** Ctrl/⌘+K — universal command palette. Works everywhere. */
+  onCommand: () => void;
+  /** T — open today's workspace. */
+  onOpenToday: () => void;
+  /** W — open the Workspace OS hub. */
+  onOpenWorkspaces: () => void;
+  /** ? — show the keyboard shortcuts cheat-sheet. */
+  onHelp: () => void;
 }
 
 /** True when focus is in a text-entry field, where global keys should pass through. */
@@ -45,6 +53,13 @@ export function useKeyboardShortcuts(
         return;
       }
 
+      // Ctrl/Cmd+K — universal search — works everywhere too.
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        handlers.onCommand();
+        return;
+      }
+
       if (!active || isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey) {
         return;
       }
@@ -58,6 +73,20 @@ export function useKeyboardShortcuts(
         case "/":
           e.preventDefault();
           handlers.onSearch();
+          break;
+        case "t":
+        case "T":
+          e.preventDefault();
+          handlers.onOpenToday();
+          break;
+        case "w":
+        case "W":
+          e.preventDefault();
+          handlers.onOpenWorkspaces();
+          break;
+        case "?":
+          e.preventDefault();
+          handlers.onHelp();
           break;
         case "ArrowLeft":
           handlers.onPrevMonth();

@@ -25,6 +25,15 @@ export function makeTask(draft: TaskDraft, order: number): Task {
     reminderAt: draft.reminderAt,
     order,
     createdAt: Date.now(),
+    // Smart metadata — carried from the composer, defaulted for the engine.
+    estimatedMinutes: draft.estimatedMinutes,
+    energy: draft.energy,
+    difficulty: draft.difficulty,
+    deadline: draft.deadline ?? null,
+    completedAt: null,
+    timesDeferred: 0,
+    timesRescheduled: 0,
+    missionId: draft.missionId ?? null,
   };
 }
 
@@ -43,6 +52,11 @@ export function taskFromTemplateItem(item: TemplateItem, order: number): Task {
     reminderAt: null,
     order,
     createdAt: Date.now(),
+    completedAt: null,
+    deadline: null,
+    timesDeferred: 0,
+    timesRescheduled: 0,
+    missionId: null,
   };
 }
 
@@ -61,5 +75,10 @@ export function taskFromRecurring(rec: RecurringTask, order: number): Task {
     reminderAt: null,
     order,
     createdAt: Date.now(),
+    completedAt: null,
+    deadline: null,
+    timesDeferred: 0,
+    timesRescheduled: 0,
+    missionId: null,
   };
 }
