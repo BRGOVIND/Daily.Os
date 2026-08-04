@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { X } from "lucide-react";
 import type { Achievement, JournalStats } from "@/hooks/useJournalStats";
 
@@ -310,7 +311,7 @@ export function GrowthTree({ stats }: GrowthTreeProps) {
                 initial={{ scale: 0.92, y: 8 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 320, damping: 26 }}
+                transition={spring.soft}
                 onClick={(e) => e.stopPropagation()}
                 className="relative w-full max-w-xs rounded-2xl border border-line bg-card p-5 text-center shadow-lift"
               >

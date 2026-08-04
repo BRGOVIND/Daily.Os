@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import {
   Sparkles,
   StickyNote,
@@ -105,7 +106,7 @@ export function QuickDock({
           open ? "text-accent" : "text-ink-muted hover:text-ink",
         )}
       >
-        <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+        <motion.span animate={{ rotate: open ? 90 : 0 }} transition={spring.snappy}>
           <Sparkles className="h-5 w-5" />
         </motion.span>
       </motion.button>

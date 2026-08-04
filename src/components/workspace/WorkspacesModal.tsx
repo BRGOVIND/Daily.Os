@@ -36,6 +36,9 @@ export function WorkspacesModal({ open, today, onOpenChange, onOpenDay }: Worksp
   const { workspaces, active, activeId, setActive, create, update, remove } = useWorkspaces();
   const [tab, setTab] = useState<WorkspaceTab>("dashboard");
   const [mode, setMode] = useState<"none" | "create" | "edit">("none");
+  // Two-step confirm for the cascading workspace delete (removes notes,
+  // resources and journal). Reset whenever the active workspace changes.
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const todayKey = today ? toDateKey(today) : null;
   const data = useWorkspaceData(active, todayKey, open);
@@ -44,6 +47,7 @@ export function WorkspacesModal({ open, today, onOpenChange, onOpenDay }: Worksp
   useEffect(() => {
     setTab("dashboard");
     setMode("none");
+    setConfirmDelete(false);
   }, [activeId]);
 
   const openDay = (key: string) => {
@@ -181,18 +185,37 @@ export function WorkspacesModal({ open, today, onOpenChange, onOpenDay }: Worksp
                   {active.archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                   {active.archived ? "Unarchive" : "Archive"}
                 </button>
-                {active.id !== DEFAULT_WORKSPACE_ID && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await remove(active.id);
-                      setMode("none");
-                    }}
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] text-ink-muted transition-colors hover:bg-accent/10 hover:text-accent"
-                  >
-                    <Trash2 className="h-4 w-4" /> Delete workspace
-                  </button>
-                )}
+                {active.id !== DEFAULT_WORKSPACE_ID &&
+                  (confirmDelete ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setConfirmDelete(false);
+                          await remove(active.id);
+                          setMode("none");
+                        }}
+                        className="flex items-center gap-1.5 rounded-full bg-[#C13030] px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-[#a82828]"
+                      >
+                        <Trash2 className="h-4 w-4" /> Delete permanently
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(false)}
+                        className="rounded-full px-3 py-1.5 text-[13px] text-ink-muted transition-colors hover:text-ink"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(true)}
+                      className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] text-ink-muted transition-colors hover:bg-accent/10 hover:text-accent"
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete workspace
+                    </button>
+                  ))}
               </div>
               <p className="text-[12px] text-ink-muted/70">
                 Deleting removes this workspace&rsquo;s notes, resources and journal. Its tasks and

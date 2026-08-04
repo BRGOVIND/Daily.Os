@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { buildMonthGrid, WEEKDAY_LABELS } from "@/lib/date";
+import { spring } from "@/lib/motion";
 import { format } from "date-fns";
 import { DayCell } from "./DayCell";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -52,7 +53,7 @@ export function CalendarGrid({
             initial={{ opacity: 0, x: direction >= 0 ? 60 : -60 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction >= 0 ? -60 : 60 }}
-            transition={{ type: "spring", stiffness: 260, damping: 30 }}
+            transition={spring.soft}
             className="grid grid-cols-7 gap-1 sm:gap-3"
           >
             {cells.map((cell) => (

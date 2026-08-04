@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { transition } from "@/lib/motion";
 import { BarChart3, LayoutGrid, Rocket, Search, Settings } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ export function TopNav({
           key={monthTitle}
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={transition.slow}
           className="hidden text-sm font-medium text-ink-muted sm:block"
         >
           {monthTitle}

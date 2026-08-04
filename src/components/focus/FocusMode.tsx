@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { transition } from "@/lib/motion";
 import { X, Check, Target } from "lucide-react";
 import { useDay, sortTasks } from "@/hooks/useDay";
 import { useMissions } from "@/hooks/useMissions";
@@ -95,7 +96,7 @@ export function FocusMode({ open, today, todayKey, onClose }: FocusModeProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={transition.slow}
           role="dialog"
           aria-modal="true"
           aria-label="Focus mode"

@@ -2,6 +2,7 @@
 
 import { memo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { Check, Plus, Target, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FocusItem } from "@/types";
@@ -109,7 +110,7 @@ const FocusCard = memo(function FocusCard({
       initial={{ opacity: 0, scale: 0.9, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      transition={spring.soft}
       className={cn(
         "group relative flex min-h-[104px] flex-col justify-between rounded-2xl border p-4 transition-colors",
         item.done

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { transition } from "@/lib/motion";
 import { ChevronDown, Sparkles, Sunrise, Sun, Sunset, Moon } from "lucide-react";
 import { usePlanner, formatDuration } from "@/hooks/usePlanner";
 import { cn } from "@/lib/utils";
@@ -69,7 +70,7 @@ export function PlannerCard({ dateKey, today }: PlannerCardProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={transition.slow}
             className="overflow-hidden"
           >
             <div className="space-y-4 px-4 pb-4">

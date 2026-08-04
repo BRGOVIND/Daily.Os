@@ -285,7 +285,7 @@ function AnimatedCount({ value }: { value: number }) {
           initial={{ y: 8, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -8, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          transition={spring.snappy}
           className="inline-block"
         >
           {value}

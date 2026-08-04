@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { spring, transition } from "@/lib/motion";
 
 type ModalVariant = "center" | "sheet";
 
@@ -48,8 +49,6 @@ export function Modal({
   className,
   showClose = true,
 }: ModalProps) {
-  const spring = { type: "spring", stiffness: 320, damping: 32, mass: 0.9 } as const;
-
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -61,7 +60,7 @@ export function Modal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={transition.base}
               />
             </Dialog.Overlay>
 
@@ -87,7 +86,7 @@ export function Modal({
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  transition={spring}
+                  transition={spring.soft}
                   className={cn(
                     "relative bg-card outline-none",
                     variant === "center"
@@ -118,7 +117,7 @@ export function Modal({
                   {showClose && (
                     <Dialog.Close
                       aria-label="Close"
-                      className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-fill/[0.05] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                      className="touch-target absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-fill/[0.05] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                     >
                       <X className="h-5 w-5" />
                     </Dialog.Close>

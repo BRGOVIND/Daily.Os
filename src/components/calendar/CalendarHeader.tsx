@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export function CalendarHeader({
         key={format(month, "yyyy-MM")}
         initial={{ opacity: 0, x: direction >= 0 ? 24 : -24 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 30 }}
+        transition={spring.soft}
         className="flex min-w-0 flex-col font-display text-[2.25rem] font-light leading-[1.02] tracking-[-0.02em] text-ink sm:block sm:text-6xl sm:leading-[1.05]"
       >
         <span className="truncate">{format(month, "MMMM")}</span>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { LayoutGrid, ChevronLeft } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { UTILITY_TOOLS, type UtilityTool } from "@/components/utilities/tools";
@@ -65,7 +66,7 @@ export function DailyUtilitiesPanel() {
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 380, damping: 38 }}
+              transition={spring.soft}
               onMouseEnter={cancelClose}
               onMouseLeave={scheduleClose}
               className="fixed right-0 top-0 z-50 flex h-dvh w-[85vw] max-w-xs flex-col bg-card shadow-lift pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
@@ -78,7 +79,7 @@ export function DailyUtilitiesPanel() {
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close"
-                  className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-fill/[0.05] hover:text-ink"
+                  className="touch-target ml-auto flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-fill/[0.05] hover:text-ink"
                 >
                   <ChevronLeft className="h-4 w-4 rotate-180" />
                 </button>

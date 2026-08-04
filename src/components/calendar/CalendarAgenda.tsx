@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { transition } from "@/lib/motion";
 import { format } from "date-fns";
 import { CalendarClock, Bell } from "lucide-react";
 import { useAgenda, type AgendaDay } from "@/hooks/useAgenda";
@@ -26,7 +27,7 @@ export function CalendarAgenda({ today, onOpenDay }: CalendarAgendaProps) {
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      transition={transition.slow}
       className="mt-10"
       aria-label="Agenda"
     >

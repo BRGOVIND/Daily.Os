@@ -75,6 +75,11 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     /* Never rubber-band the whole page behind sheets/modals on touch. */
     overscroll-behavior-y: none;
+    /* Guard against accidental horizontal scroll / viewport jump on mobile if
+       any element momentarily overflows the viewport width (e.g. a dragged
+       sticky). `clip` blocks the scroll without creating a scroll container, so
+       it doesn't break `position: sticky` descendants the way `hidden` would. */
+    overflow-x: clip;
   }
 
   /* Touch polish: kill the grey tap flash and the legacy 300ms delay, and keep
@@ -146,5 +151,26 @@
   .px-safe {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  /* Guarantee a 44px minimum tap target on compact icon controls — but only on
+     touch devices, and without changing the control's visual size or the
+     desktop layout. A transparent, centered pseudo-element extends only the
+     hit region. Apply to ISOLATED small controls (a modal's corner close, a
+     panel header button), not to tightly-packed clusters where 44px zones
+     would overlap and cause mis-taps. Inert on mouse/desktop (pointer: fine). */
+  @media (pointer: coarse) {
+    .touch-target {
+      position: relative;
+    }
+    .touch-target::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { Pin, PinOff, Plus, Search, Trash2, X, StickyNote } from "lucide-react";
 import { useQuickNotes } from "@/hooks/useQuickNotes";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
@@ -65,7 +66,7 @@ export function QuickNotesPopover({ open, dateKey, onClose }: QuickNotesPopoverP
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            transition={spring.soft}
             className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-h-[70dvh] w-auto max-w-sm flex-col rounded-3xl bg-card shadow-lift sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[22rem] pb-[env(safe-area-inset-bottom)]"
           >
             {/* Header */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar } from "./Avatar";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,7 @@ export function ProfileCard({ profile, selected, onSelect }: ProfileCardProps) {
       onClick={onSelect}
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 26 }}
+      transition={spring.snappy}
       aria-pressed={selected}
       className={cn(
         "flex w-full items-center gap-4 rounded-2xl border bg-card p-4 text-left shadow-soft transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",

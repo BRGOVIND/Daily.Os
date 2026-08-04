@@ -293,6 +293,7 @@ function MissionCard({
   const overall = progress ? Math.round(progress.overall * 100) : 0;
   const pace = PACE_STYLE[progress?.pace ?? "unknown"];
   const [milestoneTitle, setMilestoneTitle] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div
@@ -341,14 +342,33 @@ function MissionCard({
               <Archive className="h-4 w-4" />
             )}
           </button>
-          <button
-            type="button"
-            aria-label="Delete mission"
-            onClick={() => remove(mission.id)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted/60 transition-colors hover:bg-accent/10 hover:text-accent"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          {confirmDelete ? (
+            <>
+              <button
+                type="button"
+                onClick={() => remove(mission.id)}
+                className="rounded-full bg-[#C13030] px-2.5 py-1 text-[12px] font-medium text-white transition-colors hover:bg-[#a82828]"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-full px-2 py-1 text-[12px] text-ink-muted transition-colors hover:text-ink"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              aria-label="Delete mission"
+              onClick={() => setConfirmDelete(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted/60 transition-colors hover:bg-accent/10 hover:text-accent"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

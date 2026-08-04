@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import type { TrendPoint, TrendRange } from "@/hooks/useJournalStats";
 
@@ -111,7 +112,7 @@ export function TrendChart({ trends, accentHex }: TrendChartProps) {
                 <motion.span
                   layoutId="trend-range-pill"
                   className="absolute inset-0 rounded-full bg-accent"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  transition={spring.snappy}
                 />
               )}
               <span className="relative z-10">{r.label}</span>

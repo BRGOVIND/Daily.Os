@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { Bell, CalendarClock, Gauge, Repeat, Rocket, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -478,7 +479,7 @@ function SegChip({
         <motion.span
           layoutId={layoutId}
           className="absolute inset-0 rounded-lg bg-accent"
-          transition={{ type: "spring", stiffness: 400, damping: 32 }}
+          transition={spring.snappy}
         />
       )}
       <span className="relative z-10">{label}</span>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { ArrowRight, Clock, Sparkles } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -209,7 +210,7 @@ function Counter({ value, suffix }: { value: number; suffix?: string }) {
       key={value}
       initial={{ scale: 0.7, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 22 }}
+      transition={spring.pop}
       className="font-display text-3xl font-light tabular-nums text-ink"
     >
       {value}

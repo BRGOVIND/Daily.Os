@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { Bell, Check, Clock, Flag, Repeat, Trash2 } from "lucide-react";
+import { spring } from "@/lib/motion";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { COLOR_MAP, RECURRENCE_LABEL } from "@/lib/constants";
@@ -54,7 +55,7 @@ export const TaskItem = memo(function TaskItem({
       initial={{ opacity: 0, y: 8, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
-      transition={{ type: "spring", stiffness: 400, damping: 34 }}
+      transition={spring.soft}
       className={cn(
         "group flex items-start gap-3 rounded-2xl border bg-card p-3.5 transition-colors sm:p-4",
         task.completed ? "border-transparent bg-canvas/60" : "border-line hover:border-ink/15",
@@ -83,7 +84,7 @@ export const TaskItem = memo(function TaskItem({
         <motion.span
           initial={false}
           animate={{ scale: task.completed ? 1 : 0 }}
-          transition={{ type: "spring", stiffness: 520, damping: 20 }}
+          transition={spring.pop}
         >
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
         </motion.span>

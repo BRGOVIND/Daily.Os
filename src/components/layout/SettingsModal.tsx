@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import {
   Accessibility,
   Bell,
@@ -297,7 +298,7 @@ function ToggleRow({
       >
         <motion.span
           layout
-          transition={{ type: "spring", stiffness: 500, damping: 32 }}
+          transition={spring.snappy}
           className={cn(
             "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm",
             checked ? "right-0.5" : "left-0.5",

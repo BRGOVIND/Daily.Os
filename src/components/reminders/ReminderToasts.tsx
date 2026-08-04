@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { Bell, X } from "lucide-react";
 import type { ReminderTarget } from "@/hooks/useReminders";
 
@@ -39,7 +40,7 @@ export function ReminderToasts({
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            transition={spring.soft}
             className="pointer-events-auto rounded-2xl bg-card p-3.5 shadow-lift ring-1 ring-fill/5"
           >
             <div className="flex items-start gap-2.5">

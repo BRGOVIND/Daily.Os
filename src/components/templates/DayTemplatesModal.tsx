@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { transition } from "@/lib/motion";
 import { format } from "date-fns";
 import { ChevronDown, Repeat, Plus, Check } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
@@ -116,7 +117,7 @@ export function DayTemplatesModal({
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={transition.base}
                     >
                       <div className="border-t border-fill/5 px-4 py-3">
                         <ul className="mb-3 space-y-1.5">

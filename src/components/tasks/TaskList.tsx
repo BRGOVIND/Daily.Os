@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { transition } from "@/lib/motion";
 import { ListChecks, Plus, SlidersHorizontal } from "lucide-react";
 import { sortTasks } from "@/hooks/useDay";
 import { cn } from "@/lib/utils";
@@ -105,7 +106,7 @@ export function TaskList({
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          transition={transition.slow}
           className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line py-12 text-center"
         >
           <div>

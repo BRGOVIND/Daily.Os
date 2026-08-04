@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { dayProgress } from "@/lib/status";
@@ -48,7 +49,7 @@ function DayCellBase({ cell, summary, onSelect, compact = false }: DayCellProps)
       onClick={() => onSelect(key)}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 400, damping: 26 }}
+      transition={spring.snappy}
       aria-label={`${format(date, "EEEE, MMMM d, yyyy")}${
         hasTasks ? `, ${completed} of ${total} tasks done` : ""
       }`}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { Download, Share, Plus, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -111,7 +112,7 @@ export function PwaController() {
           initial={{ opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 320, damping: 30 }}
+          transition={spring.soft}
           style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
           className="fixed left-1/2 z-40 flex w-[min(92vw,26rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift"
           role="dialog"
@@ -150,7 +151,7 @@ export function PwaController() {
           initial={{ opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 320, damping: 30 }}
+          transition={spring.soft}
           style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
           className="fixed left-1/2 z-40 flex w-[min(92vw,26rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift"
           role="dialog"

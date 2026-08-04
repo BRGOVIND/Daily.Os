@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import {
   Pause,
   Play,
@@ -72,7 +73,7 @@ export function PomodoroPanel({ today, compact = false }: PomodoroPanelProps) {
                 layoutId="pomo-phase-pill"
                 className="absolute inset-0 rounded-full"
                 style={{ backgroundColor: tone }}
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                transition={spring.snappy}
               />
             )}
             <span className="relative">{POMODORO_PHASES[p].label}</span>
