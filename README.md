@@ -53,7 +53,7 @@ I built it because it's the planner I genuinely wanted to use every day.
 
 ## Features
 
-### 📅 Daily Planning
+###  Daily Planning
 
 - Calendar-first workflow
 - Every day has its own workspace
@@ -62,7 +62,7 @@ I built it because it's the planner I genuinely wanted to use every day.
 - Daily notes
 - Daily journal
 
-### 🌱 Productivity
+###  Productivity
 
 - Habit tracking
 - Recurring tasks
@@ -71,7 +71,7 @@ I built it because it's the planner I genuinely wanted to use every day.
 - Daily review
 - Tomorrow planning
 
-### 🧠 Organization
+###  Organization
 
 - Multiple workspaces
 - Templates
@@ -80,7 +80,7 @@ I built it because it's the planner I genuinely wanted to use every day.
 - Export / Import
 - Offline-first
 
-### 💻 Desktop & Mobile
+###  Desktop & Mobile
 
 - Installable PWA
 - Native Windows desktop app (Tauri)
@@ -224,3 +224,4 @@ Open an issue or submit a pull request.
 MIT License
 
 Feel free to fork it, improve it, or build something completely different with it.
+:)
