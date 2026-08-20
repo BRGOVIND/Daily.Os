@@ -192,20 +192,6 @@ No servers.
 
 No tracking.
 
----
-
-## Roadmap
-
-Some ideas for the future:
-
-- Optional end-to-end encrypted sync
-- AI planning assistant (optional)
-- Local AI integrations
-- Better recurring tasks
-- Better reminders
-- More themes
-
-If an idea makes the app more complicated than useful, it probably won't be added.
 
 ---
 
