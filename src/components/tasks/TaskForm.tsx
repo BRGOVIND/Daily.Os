@@ -50,7 +50,7 @@ const DEFAULTS: TaskDraft = {
   notes: "",
   recurrence: "none",
   reminderAt: null,
-  // Smart metadata — all optional; the engine defaults anything left unset.
+  // Planning metadata — all optional; the engine defaults anything left unset.
   estimatedMinutes: undefined,
   energy: undefined,
   difficulty: undefined,
@@ -58,7 +58,7 @@ const DEFAULTS: TaskDraft = {
   missionId: null,
 };
 
-/** Normalize a raw form draft: drop empty/NaN smart fields to undefined/null. */
+/** Normalize a raw form draft: drop empty/NaN optional fields to undefined/null. */
 function cleanDraft(draft: TaskDraft): TaskDraft {
   const minutes = draft.estimatedMinutes;
   return {
@@ -277,11 +277,11 @@ export function TaskForm({
             </div>
           </div>
 
-          {/* Smart details — optional metadata the Intelligence Engine uses to
+          {/* Planning details — optional metadata the Planning Engine uses to
               prioritise and plan. Everything here is safe to leave blank. */}
           <div className="flex flex-col gap-3 rounded-2xl border border-line bg-canvas/50 p-3.5">
             <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
-              Smart details · optional
+              Planning details · optional
             </p>
 
             {/* Estimate */}

@@ -4,7 +4,7 @@
  * Aggregates a scoped snapshot into everything the dashboard surface shows:
  * headline stats, the active-task queue, recent notes and resources, a recent
  * slice of the timeline and the active missions. Pure — the UI merges the
- * Intelligence Engine's mission progress on top.
+ * Planning Engine's mission progress on top.
  */
 
 import type { Workspace } from "@/types";

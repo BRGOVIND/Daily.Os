@@ -1,7 +1,7 @@
 /**
  * Module 9 — Knowledge Graph.
  *
- * A lightweight relationship map — no AI, no embeddings. It lays the workspace
+ * A lightweight relationship map built from saved data. It lays the workspace
  * at the centre, missions on an inner ring, each mission's milestones and linked
  * tasks orbiting it, and loose knowledge (notes, resources, journal) on an outer
  * ring. Coordinates are deterministic and normalized to a [-1, 1] square so the

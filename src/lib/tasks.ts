@@ -25,7 +25,7 @@ export function makeTask(draft: TaskDraft, order: number): Task {
     reminderAt: draft.reminderAt,
     order,
     createdAt: Date.now(),
-    // Smart metadata — carried from the composer, defaulted for the engine.
+    // Planning metadata — carried from the composer, defaulted for the engine.
     estimatedMinutes: draft.estimatedMinutes,
     energy: draft.energy,
     difficulty: draft.difficulty,

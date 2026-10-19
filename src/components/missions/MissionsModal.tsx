@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useMissions } from "@/hooks/useMissions";
-import { useIntelligence } from "@/hooks/useIntelligence";
+import { usePlanningReport } from "@/hooks/usePlanningReport";
 import { toDateKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, COLOR_MAP, DEFAULT_WORKSPACE_ID, TASK_COLORS } from "@/lib/constants";
@@ -46,11 +46,11 @@ const MISSION_ICONS = ["🎯", "🚀", "💼", "🏋️", "🎓", "🌍", "💡"
 /**
  * Mission Mode — Daily OS's long-term execution surface. Create missions with
  * milestones, link tasks to them (from the composer), and watch live progress
- * and pace derived by the Intelligence Engine.
+ * and pace derived by the Planning Engine.
  */
 export function MissionsModal({ open, today, onOpenChange }: MissionsModalProps) {
   const { missions, loading } = useMissions();
-  const report = useIntelligence(open ? today : null);
+  const report = usePlanningReport(open ? today : null);
 
   const progressById = useMemo(() => {
     const map = new Map<string, MissionProgress>();

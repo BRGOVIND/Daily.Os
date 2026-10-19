@@ -44,7 +44,7 @@ export const TaskItem = memo(function TaskItem({
 }: TaskItemProps) {
   const swatch = COLOR_MAP[task.color];
 
-  // Calculated priority (Intelligence Engine). Only surfaced for actionable
+  // Calculated priority (Planning Engine). Only surfaced for actionable
   // tasks, and only when it's High/Critical — quiet by default.
   const band = today && !task.completed ? computePriority(task, today).band : null;
   const showBand = band === "high" || band === "critical";

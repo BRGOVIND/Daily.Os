@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
  * Real DOM mount of StatsModal against an (empty) IndexedDB — the fresh-user
- * path. Exercises effects, the Radix portal and the Intelligence panel that a
+ * path. Exercises effects, the Radix portal and the Planning panel that a
  * static render can't reach. This is the kind of test that would have caught a
  * runtime crash the production build (which only prerenders the skeleton) misses.
  */

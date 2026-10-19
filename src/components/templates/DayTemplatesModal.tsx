@@ -26,7 +26,7 @@ interface DayTemplatesModalProps {
 }
 
 /**
- * Smart recurring templates — minimal, emoji-free day routines. Each can be
+ * Recurring templates — minimal, emoji-free day routines. Each can be
  * dropped onto the day once or turned into a recurring routine at its suggested
  * cadence.
  */

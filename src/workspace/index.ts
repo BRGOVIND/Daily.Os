@@ -4,7 +4,7 @@
  * A self-contained, offline, UI-agnostic domain that turns a snapshot of the
  * user's data into workspace-scoped views: notes, journal, resources, a derived
  * timeline, universal search, a knowledge graph and statistics. It depends only
- * on `@/types`, `@/lib` leaf helpers, the Intelligence Engine's pure exports and
+ * on `@/types`, `@/lib` leaf helpers, the Planning Engine's pure exports and
  * date-fns — never on React, Dexie or any component. The UI consumes these
  * outputs; it never reimplements them.
  *

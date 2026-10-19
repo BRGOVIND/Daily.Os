@@ -54,10 +54,10 @@ export interface Task {
   order: number;
   createdAt: number;
 
-  // ─── Smart task metadata (Phase 4, all optional & back-compatible) ───────
+  // ─── Planning task metadata (Phase 4, all optional & back-compatible) ───────
   //
   // Every field below is optional so pre-Phase-4 records and older JSON
-  // backups load untouched. The Intelligence Engine reads them through
+  // backups load untouched. The Planning Engine reads them through
   // defaulting helpers, so a task with none of these still scores and plans.
 
   /** User's estimated duration in minutes. Engine falls back to a default. */
@@ -168,7 +168,7 @@ export interface Milestone {
  * A long-term objective ("Crack Placements", "Launch Startup"). Missions live
  * in their own table; tasks link back via `Task.missionId`, so the Planner can
  * recommend daily work toward whatever missions are active. Progress is
- * calculated by the Intelligence Engine, never stored.
+ * calculated by the Planning Engine, never stored.
  */
 export interface Mission {
   id: string;
@@ -450,7 +450,7 @@ export type TaskDraft = Pick<
   | "notes"
   | "recurrence"
   | "reminderAt"
-  // Smart metadata the composer can optionally set.
+  // Planning metadata the composer can optionally set.
   | "estimatedMinutes"
   | "energy"
   | "difficulty"

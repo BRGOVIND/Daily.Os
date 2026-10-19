@@ -56,14 +56,14 @@ export const PRIORITY_WEIGHT: Record<Priority, number> = {
   low: 2,
 };
 
-/** Energy-level quick-picks for the smart task composer (Phase 4). */
+/** Energy-level quick-picks for the task composer (Phase 4). */
 export const ENERGY_OPTIONS: { key: EnergyLevel; label: string }[] = [
   { key: "low", label: "Low" },
   { key: "medium", label: "Medium" },
   { key: "high", label: "High" },
 ];
 
-/** Difficulty quick-picks for the smart task composer (Phase 4). */
+/** Difficulty quick-picks for the task composer (Phase 4). */
 export const DIFFICULTY_OPTIONS: { key: Difficulty; label: string }[] = [
   { key: "easy", label: "Easy" },
   { key: "medium", label: "Medium" },
@@ -407,7 +407,7 @@ export const DAILY_UTILITIES: {
 ];
 
 /**
- * Smart recurring day templates (Phase 9, feature 6). Deliberately emoji-free —
+ * Recurring day templates (Phase 9, feature 6). Deliberately emoji-free —
  * minimal and elegant. Applying one drops its tasks onto a chosen day; each can
  * also be materialized as a recurring routine.
  */

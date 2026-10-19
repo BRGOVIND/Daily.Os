@@ -4,14 +4,14 @@
  * but order-of-magnitude and scaling with dataset size are the real signal).
  *
  * Measures median wall time of:
- *   1. buildIntelligenceReport  — runs on Stats + Missions open (full day scan)
+ *   1. buildPlanningReport  — runs on Stats + Missions open (full day scan)
  *   2. computePriority (bulk)   — the per-TaskItem engine call, times N tasks
  *
  * Not a pass/fail gate on timing (that would be flaky across machines); it
  * asserts only that the functions run, and PRINTS the numbers as evidence.
  */
 import { describe, expect, it } from "vitest";
-import { buildIntelligenceReport, computePriority } from "@/engine";
+import { buildPlanningReport, computePriority } from "@/engine";
 import type { DayRecord, HabitDef, Mission, Task } from "@/types";
 
 function key(offsetFromToday: number): string {
@@ -113,14 +113,14 @@ function timeIt(label: string, fn: () => void, iterations = 7): number {
 }
 
 describe("engine CPU benchmark (evidence, not a timing gate)", () => {
-  it("buildIntelligenceReport scales across dataset sizes", () => {
+  it("buildPlanningReport scales across dataset sizes", () => {
     for (const days of [90, 365, 1095]) {
       const { dayRecords, habitDefs, missions } = buildDataset(days, 8, 12);
       const totalTasks = days * 12;
       timeIt(
-        `buildIntelligenceReport days=${days} tasks=${totalTasks}`,
+        `buildPlanningReport days=${days} tasks=${totalTasks}`,
         () => {
-          const report = buildIntelligenceReport({
+          const report = buildPlanningReport({
             today: key(0),
             days: dayRecords,
             habits: habitDefs,

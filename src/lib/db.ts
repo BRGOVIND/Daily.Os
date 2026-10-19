@@ -92,7 +92,7 @@ export class DailyOSDatabase extends Dexie {
           });
       });
 
-    // v3 — Intelligence Engine: a missions table + smart-task backfill. Every
+    // v3 — Planning Engine: a missions table + task metadata backfill. Every
     // new task field is optional, but backfilling normalizes older rows so the
     // engine never has to special-case pre-Phase-4 data.
     this.version(3)
@@ -176,7 +176,7 @@ export class DailyOSDatabase extends Dexie {
 }
 
 /**
- * Normalize a pre-Phase-4 task to the smart-task shape without inventing data:
+ * Normalize a pre-Phase-4 task to the current task shape without inventing data:
  * counters start at 0, a task already marked complete gets a best-effort
  * completion timestamp so energy/time analysis has something to work with.
  */
