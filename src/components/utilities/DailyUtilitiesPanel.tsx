@@ -12,8 +12,13 @@ import { UTILITY_TOOLS, type UtilityTool } from "@/components/utilities/tools";
  * hover of the edge handle (or click); on touch the handle is a 44px tap
  * target. Each tool opens as a lightweight overlay, never a full page.
  */
-export function DailyUtilitiesPanel() {
-  const [open, setOpen] = useState(false);
+export function DailyUtilitiesPanel({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [active, setActive] = useState<UtilityTool | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -25,7 +30,7 @@ export function DailyUtilitiesPanel() {
   };
   const scheduleClose = () => {
     cancelClose();
-    closeTimer.current = setTimeout(() => setOpen(false), 220);
+    closeTimer.current = setTimeout(() => onOpenChange(false), 220);
   };
 
   useEffect(() => () => cancelClose(), []);
@@ -34,16 +39,16 @@ export function DailyUtilitiesPanel() {
     <>
       {/* Edge handle — hover to open (desktop), tap to toggle (touch) */}
       <div
-        className="fixed right-0 top-1/2 z-40 -translate-y-1/2"
+        className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 sm:block"
         onMouseEnter={() => {
           cancelClose();
-          setOpen(true);
+          onOpenChange(true);
         }}
         onMouseLeave={scheduleClose}
       >
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => onOpenChange(!open)}
           aria-label="Daily utilities"
           aria-expanded={open}
           className="flex h-16 w-8 items-center justify-center rounded-l-2xl bg-card text-ink-muted shadow-lift transition-colors hover:text-accent"
@@ -60,7 +65,7 @@ export function DailyUtilitiesPanel() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
             />
             <motion.aside
               initial={{ x: "100%" }}
@@ -77,7 +82,7 @@ export function DailyUtilitiesPanel() {
                 <h2 className="text-sm font-semibold text-ink">Utilities</h2>
                 <button
                   type="button"
-                  onClick={() => setOpen(false)}
+                  onClick={() => onOpenChange(false)}
                   aria-label="Close"
                   className="touch-target ml-auto flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-fill/[0.05] hover:text-ink"
                 >
