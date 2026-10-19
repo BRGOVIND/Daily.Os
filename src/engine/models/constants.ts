@@ -1,8 +1,8 @@
 /**
- * Tunable weights and thresholds for the Intelligence Engine.
+ * Tunable weights and thresholds for the Planning Engine.
  *
  * These live in one place so the scoring behaviour can be reasoned about (and,
- * one day, learned per-user) without hunting through the algorithms. Nothing
+ * one day, calculated per-user) without hunting through the algorithms. Nothing
  * here touches React, Dexie or the DOM — the engine is a pure domain.
  */
 

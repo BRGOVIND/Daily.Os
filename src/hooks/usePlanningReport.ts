@@ -4,16 +4,16 @@ import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { toDateKey } from "@/lib/date";
-import { buildIntelligenceReport, type IntelligenceReport } from "@/engine";
+import { buildPlanningReport, type PlanningReport } from "@/engine";
 import type { DayRecord, HabitDef, Mission } from "@/types";
 
 /**
- * Runs the full Intelligence Engine over the live database, memoized on the
+ * Runs the full Planning Engine over the live database, memoized on the
  * underlying data so the (non-trivial) computation only re-runs when days,
  * habits or missions actually change. Inert when `today` is null — the modal
  * that consumes it is closed, so nothing is read or computed.
  */
-export function useIntelligence(today: Date | null): IntelligenceReport | null {
+export function usePlanningReport(today: Date | null): PlanningReport | null {
   const days = useLiveQuery(
     () => (today ? db.days.toArray() : Promise.resolve<DayRecord[]>([])),
     [today !== null],
@@ -29,7 +29,7 @@ export function useIntelligence(today: Date | null): IntelligenceReport | null {
 
   return useMemo(() => {
     if (!today || !days || !habits || !missions) return null;
-    return buildIntelligenceReport({
+    return buildPlanningReport({
       today: toDateKey(today),
       days,
       habits,

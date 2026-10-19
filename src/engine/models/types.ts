@@ -1,5 +1,5 @@
 /**
- * Output shapes produced by the Intelligence Engine and consumed by the UI.
+ * Output shapes produced by the Planning Engine and consumed by the UI.
  *
  * The UI never recomputes any of this — it renders these structures. Keeping
  * them in one file makes the engine's public surface easy to read.
@@ -142,18 +142,18 @@ export interface BurnoutReport {
   suggestions: string[];
 }
 
-// ─── Weekly coach (Module 8) ─────────────────────────────────────────────────
+// ─── Weekly review (Module 8) ─────────────────────────────────────────────────
 
-export interface CoachInsight {
+export interface ReviewInsight {
   key: string;
   icon: string;
   title: string;
   detail: string;
 }
 
-export interface WeeklyCoachReport {
+export interface WeeklyReviewReport {
   weekLabel: string;
-  insights: CoachInsight[];
+  insights: ReviewInsight[];
   /** Completed-task change vs the previous week (percent). */
   improvement: number;
   hasData: boolean;
@@ -225,12 +225,12 @@ export interface MissionRecommendation {
 
 // ─── Aggregate report ────────────────────────────────────────────────────────
 
-export interface IntelligenceReport {
+export interface PlanningReport {
   productivity: ProductivityScore;
   workload: WorkloadReport;
   energy: EnergyInsight;
   burnout: BurnoutReport;
-  coach: WeeklyCoachReport;
+  weeklyReview: WeeklyReviewReport;
   priorityDistribution: PriorityDistribution;
   missions: MissionProgress[];
   missionRecommendations: MissionRecommendation[];

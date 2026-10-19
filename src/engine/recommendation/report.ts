@@ -1,23 +1,23 @@
 /**
  * Aggregate report builder — the single entry point that runs every analytics
  * module over one snapshot of the user's data and returns the combined
- * IntelligenceReport the UI renders. Pure: same input → same output.
+ * PlanningReport the UI renders. Pure: same input → same output.
  */
 
 import { format, parseISO, subDays } from "date-fns";
-import type { EngineInput, IntelligenceReport } from "@/engine/models/types";
+import type { EngineInput, PlanningReport } from "@/engine/models/types";
 import { flattenTasks } from "@/engine/utils/tasks";
 import { priorityDistribution } from "@/engine/prediction/priority";
 import { analyzeWorkload } from "@/engine/analytics/workload";
 import { computeProductivity } from "@/engine/analytics/productivity";
 import { analyzeEnergy } from "@/engine/analytics/energy";
 import { detectBurnout } from "@/engine/analytics/burnout";
-import { weeklyCoach } from "@/engine/analytics/coach";
+import { weeklyReview } from "@/engine/analytics/review";
 import { missionProgress, missionRecommendations } from "./missions";
 
-export function buildIntelligenceReport(
+export function buildPlanningReport(
   input: EngineInput,
-): IntelligenceReport {
+): PlanningReport {
   const { today, days, habits, missions } = input;
 
   const byDate = new Map(days.map((d) => [d.date, d]));
@@ -37,7 +37,7 @@ export function buildIntelligenceReport(
   const workload = analyzeWorkload(today, byDate);
   const energy = analyzeEnergy(energyTasks);
   const burnout = detectBurnout(today, byDate, habits, windowTasks);
-  const coach = weeklyCoach(today, byDate, habits, windowTasks);
+  const weeklyReviewReport = weeklyReview(today, byDate, habits, windowTasks);
   const priorityDist = priorityDistribution(actionable, today);
 
   const activeMissions = missions.filter((m) => !m.archived);
@@ -51,7 +51,7 @@ export function buildIntelligenceReport(
     workload,
     energy,
     burnout,
-    coach,
+    weeklyReview: weeklyReviewReport,
     priorityDistribution: priorityDist,
     missions: missionReports,
     missionRecommendations: recs,

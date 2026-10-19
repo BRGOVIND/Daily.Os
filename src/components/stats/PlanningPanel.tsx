@@ -4,24 +4,24 @@ import { motion } from "framer-motion";
 import {
   Activity,
   BatteryCharging,
-  Brain,
+  BarChart3,
   CalendarRange,
   Flag,
   Gauge,
   HeartPulse,
   Rocket,
 } from "lucide-react";
-import { useIntelligence } from "@/hooks/useIntelligence";
+import { usePlanningReport } from "@/hooks/usePlanningReport";
 import { formatDuration } from "@/hooks/usePlanner";
 import { cn } from "@/lib/utils";
 import { formatHour } from "@/engine";
 import type {
   BurnoutRisk,
-  IntelligenceReport,
+  PlanningReport,
   ProductivityBand,
 } from "@/engine";
 
-interface IntelligencePanelProps {
+interface PlanningPanelProps {
   today: Date | null;
 }
 
@@ -47,22 +47,22 @@ const BURNOUT_BAND: Record<BurnoutRisk, { label: string; className: string }> = 
 };
 
 /**
- * The Intelligence Engine surfaced as a calm set of statistics: productivity
- * score, workload, priority mix, energy, weekly coaching, burnout and mission
+ * The Planning Engine surfaced as a calm set of statistics: productivity
+ * score, workload, priority mix, energy, weekly review, burnout and mission
  * progress. All numbers come straight from the engine — this panel only renders.
  */
-export function IntelligencePanel({ today }: IntelligencePanelProps) {
-  const report = useIntelligence(today);
+export function PlanningPanel({ today }: PlanningPanelProps) {
+  const report = usePlanningReport(today);
   if (!report) return null;
 
   return (
     <div className="space-y-6">
-      <SectionTitle icon={Brain} label="Intelligence" />
+      <SectionTitle icon={BarChart3} label="Planning" />
       <ProductivityCard report={report} />
       <WorkloadCard report={report} />
       <PriorityCard report={report} />
       <EnergyCard report={report} />
-      <CoachCard report={report} />
+      <ReviewCard report={report} />
       <BurnoutCard report={report} />
       <MissionsCard report={report} />
     </div>
@@ -73,7 +73,7 @@ function SectionTitle({
   icon: Icon,
   label,
 }: {
-  icon: typeof Brain;
+  icon: typeof BarChart3;
   label: string;
 }) {
   return (
@@ -91,7 +91,7 @@ function Card({
   title,
   children,
 }: {
-  icon: typeof Brain;
+  icon: typeof BarChart3;
   title: string;
   children: React.ReactNode;
 }) {
@@ -127,7 +127,7 @@ function Bar({ ratio, color }: { ratio: number; color?: string }) {
   );
 }
 
-function ProductivityCard({ report }: { report: IntelligenceReport }) {
+function ProductivityCard({ report }: { report: PlanningReport }) {
   const { productivity } = report;
   const band = PRODUCTIVITY_BAND[productivity.band];
   const deltaLabel =
@@ -193,7 +193,7 @@ function ProductivityCard({ report }: { report: IntelligenceReport }) {
   );
 }
 
-function WorkloadCard({ report }: { report: IntelligenceReport }) {
+function WorkloadCard({ report }: { report: PlanningReport }) {
   const { workload } = report;
   const buckets = [workload.today, workload.tomorrow, workload.week];
   return (
@@ -244,7 +244,7 @@ function WorkloadCard({ report }: { report: IntelligenceReport }) {
   );
 }
 
-function PriorityCard({ report }: { report: IntelligenceReport }) {
+function PriorityCard({ report }: { report: PlanningReport }) {
   const d = report.priorityDistribution;
   const rows: Array<[string, number, string]> = [
     ["Critical", d.critical, BAND_DOT.critical],
@@ -280,7 +280,7 @@ function PriorityCard({ report }: { report: IntelligenceReport }) {
   );
 }
 
-function EnergyCard({ report }: { report: IntelligenceReport }) {
+function EnergyCard({ report }: { report: PlanningReport }) {
   const { energy } = report;
   const max = Math.max(1, ...energy.hours.map((h) => h.weightedEffort));
   return (
@@ -330,11 +330,11 @@ function isHourInWindow(hour: number, start: number, end: number): boolean {
   return hour >= start || hour <= end; // wraps midnight
 }
 
-function CoachCard({ report }: { report: IntelligenceReport }) {
-  const { coach } = report;
-  if (!coach.hasData) {
+function ReviewCard({ report }: { report: PlanningReport }) {
+  const { weeklyReview } = report;
+  if (!weeklyReview.hasData) {
     return (
-      <Card icon={CalendarRange} title="Weekly coach">
+      <Card icon={CalendarRange} title="Weekly review">
         <p className="text-[13px] text-ink-muted">
           Keep planning — your first weekly insights appear once there&rsquo;s a
           week of activity to compare.
@@ -343,9 +343,9 @@ function CoachCard({ report }: { report: IntelligenceReport }) {
     );
   }
   return (
-    <Card icon={CalendarRange} title={`Weekly coach · ${coach.weekLabel}`}>
+    <Card icon={CalendarRange} title={`Weekly review · ${weeklyReview.weekLabel}`}>
       <div className="space-y-2.5">
-        {coach.insights.map((insight) => (
+        {weeklyReview.insights.map((insight) => (
           <div key={insight.key} className="flex gap-2.5">
             <span aria-hidden className="text-base leading-tight">
               {insight.icon}
@@ -361,7 +361,7 @@ function CoachCard({ report }: { report: IntelligenceReport }) {
   );
 }
 
-function BurnoutCard({ report }: { report: IntelligenceReport }) {
+function BurnoutCard({ report }: { report: PlanningReport }) {
   const { burnout } = report;
   const band = BURNOUT_BAND[burnout.risk];
   return (
@@ -397,7 +397,7 @@ function BurnoutCard({ report }: { report: IntelligenceReport }) {
   );
 }
 
-function MissionsCard({ report }: { report: IntelligenceReport }) {
+function MissionsCard({ report }: { report: PlanningReport }) {
   const { missions } = report;
   if (missions.length === 0) return null;
   return (

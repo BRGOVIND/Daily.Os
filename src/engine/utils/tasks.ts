@@ -1,5 +1,5 @@
 /**
- * Defaulting accessors over the smart-task metadata. Every getter tolerates a
+ * Defaulting accessors over optional task metadata. Every getter tolerates a
  * missing field so the engine treats a bare pre-Phase-4 task exactly like a
  * fully-annotated one — the whole engine reads tasks through these, never off
  * the raw optional fields.

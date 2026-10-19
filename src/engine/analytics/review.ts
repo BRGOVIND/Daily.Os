@@ -1,15 +1,15 @@
 /**
- * Module 8 — Weekly Coach.
+ * Module 8 — Weekly Review.
  *
  * Generates a handful of plain-language insights each week by comparing the
  * last 7 days to the 7 before. Everything here is template-driven string
- * assembly over computed numbers — deliberately NOT AI.
+ * assembly over computed numbers.
  */
 
 import { format, parseISO, subDays } from "date-fns";
 import type { DayRecord, HabitDef } from "@/types";
 import type { DatedTask } from "@/engine/models/types";
-import type { CoachInsight, WeeklyCoachReport } from "@/engine/models/types";
+import type { ReviewInsight, WeeklyReviewReport } from "@/engine/models/types";
 import { timesDeferred } from "@/engine/utils/tasks";
 
 interface WeekAgg {
@@ -44,12 +44,12 @@ function aggregate(
   return agg;
 }
 
-export function weeklyCoach(
+export function weeklyReview(
   today: string,
   byDate: Map<string, DayRecord>,
   habits: HabitDef[],
   windowTasks: DatedTask[],
-): WeeklyCoachReport {
+): WeeklyReviewReport {
   const thisWeek = aggregate(today, 0, byDate);
   const lastWeek = aggregate(today, 7, byDate);
   const weekLabel = `${format(subDays(parseISO(today), 6), "MMM d")} – ${format(
@@ -57,7 +57,7 @@ export function weeklyCoach(
     "MMM d",
   )}`;
 
-  const insights: CoachInsight[] = [];
+  const insights: ReviewInsight[] = [];
 
   // Most / least productive weekday.
   const weekdayEntries = [...thisWeek.byWeekday.entries()].filter(

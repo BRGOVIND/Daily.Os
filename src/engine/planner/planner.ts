@@ -3,7 +3,7 @@
  *
  * Produces a *recommended* shape for a day: which work belongs in the morning,
  * afternoon, evening and night, given priority, difficulty, energy, deadlines
- * and the user's learned peak window. It returns suggestions only — it never
+ * and the user's calculated peak window. It returns suggestions only — it never
  * mutates the user's actual plan.
  */
 

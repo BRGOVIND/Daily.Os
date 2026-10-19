@@ -1,9 +1,9 @@
 /**
- * Intelligence Engine — public API.
+ * Planning Engine — public API.
  *
  * A self-contained, offline, UI-agnostic domain that turns a snapshot of the
  * user's data (days, habits, missions) into planning, prioritisation and
- * coaching outputs. It depends only on `@/types`, date-fns and its own modules
+ * weekly review outputs. It depends only on `@/types`, date-fns and its own modules
  * — never on React, Dexie or any component. The UI consumes these outputs; it
  * never reimplements them.
  *
@@ -13,10 +13,10 @@
  *   Module 5  Productivity ............. computeProductivity
  *   Module 6  Energy ................... analyzeEnergy
  *   Module 7  Burnout ................. detectBurnout
- *   Module 8  Weekly Coach ............ weeklyCoach
+ *   Module 8  Weekly Review ............ weeklyReview
  *   Module 9  Estimation .............. dayWorkloadMinutes, …
  *   Module 10 Mission Mode ............ missionProgress, missionRecommendations
- *   Aggregate ......................... buildIntelligenceReport
+ *   Aggregate ......................... buildPlanningReport
  */
 
 // Types
@@ -62,11 +62,11 @@ export { analyzeWorkload } from "./analytics/workload";
 export { computeProductivity } from "./analytics/productivity";
 export { analyzeEnergy } from "./analytics/energy";
 export { detectBurnout } from "./analytics/burnout";
-export { weeklyCoach } from "./analytics/coach";
+export { weeklyReview } from "./analytics/review";
 
 // Planner
 export { buildDayPlan } from "./planner/planner";
 
 // Recommendation / missions
 export { missionProgress, missionRecommendations } from "./recommendation/missions";
-export { buildIntelligenceReport } from "./recommendation/report";
+export { buildPlanningReport } from "./recommendation/report";
