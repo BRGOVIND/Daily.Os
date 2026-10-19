@@ -564,5 +564,10 @@ export interface ExportBundle {
   members?: Member[];
   comments?: Comment[];
   activity?: Activity[];
+  /** Daily productivity data (v6). Absent in older backups. */
+  quickNotes?: QuickNote[];
+  stickyNotes?: StickyNote[];
+  pomodoroSessions?: PomodoroSession[];
+  utilities?: UtilityRecord[];
   settings: AppSettings | null;
 }

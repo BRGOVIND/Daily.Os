@@ -55,7 +55,7 @@ export function GraphTab({ graph }: GraphTabProps) {
       <EmptyState
         icon={<Share2 className="h-8 w-8" />}
         title="Nothing connected yet."
-        hint="Add missions, tasks, notes and resources — the graph draws the relationships between them."
+        hint="Add a mission, note, resource or journal entry to draw connections. Tasks appear when linked to missions."
       />
     );
   }

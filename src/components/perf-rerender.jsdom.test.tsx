@@ -85,7 +85,6 @@ describe("AppShell re-render cascade (measured)", () => {
     const after = { ...counts.map };
 
     const delta = (k: string) => (after[k] ?? 0) - (before[k] ?? 0);
-    // eslint-disable-next-line no-console
     console.log("RERENDER_DELTAS", JSON.stringify({
       Calendar: delta("Calendar"),
       TodayPreview: delta("TodayPreview"),

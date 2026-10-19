@@ -28,7 +28,7 @@ export function CalendarAgenda({ today, onOpenDay }: CalendarAgendaProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={transition.slow}
-      className="mt-10"
+      className="mt-6 sm:mt-10"
       aria-label="Agenda"
     >
       <div className="mb-3 flex items-center gap-2 px-1">
@@ -143,7 +143,7 @@ function AgendaRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
         <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: dot }} />
         <span className="truncate text-sm text-ink">{task.title}</span>
         {task.priority === "high" && (
-          <span className="shrink-0 rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+          <span className="shrink-0 rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-ink">
             High
           </span>
         )}

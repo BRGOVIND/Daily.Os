@@ -195,7 +195,7 @@ export function EntryFlow() {
           </motion.div>
         ) : step === "dashboard" && active && ctx ? (
           <motion.div
-            key="dashboard"
+            key={`dashboard-${active.dbName}`}
             initial={{ opacity: 0, y: 28, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: EASE }}

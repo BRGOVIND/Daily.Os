@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
 /** Web app manifest — makes Daily OS installable with a themed splash. */
 export default function manifest(): MetadataRoute.Manifest {
   return {

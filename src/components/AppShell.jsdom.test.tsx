@@ -8,6 +8,11 @@ import "fake-indexeddb/auto";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { createElement } from "react";
+
+// This test covers shell entry points; loading unopened modal chunks can race
+// jsdom teardown and obscure the assertion with an unrelated import error.
+vi.mock("next/dynamic", () => ({ default: () => () => null }));
+
 import { AppShell } from "./AppShell";
 import { ProfileProvider, type ProfileContextValue } from "./profile/ProfileContext";
 import { guestProfile } from "@/lib/profiles";

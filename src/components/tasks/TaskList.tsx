@@ -18,6 +18,7 @@ interface TaskListProps {
   tasks: Task[];
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onMoveToNextDay: (id: string) => void;
   onAdd: () => void;
   /** Today's date key — passed through so items can show calculated priority. */
   today?: string;
@@ -35,6 +36,7 @@ export function TaskList({
   tasks,
   onToggle,
   onDelete,
+  onMoveToNextDay,
   onAdd,
   today,
 }: TaskListProps) {
@@ -139,6 +141,7 @@ export function TaskList({
                 task={task}
                 onToggle={onToggle}
                 onDelete={onDelete}
+                onMoveToNextDay={onMoveToNextDay}
                 today={today}
               />
             ))}

@@ -1,4 +1,4 @@
-import { db, updateDay } from "@/lib/db";
+import { db, emptyDay, updateDay } from "@/lib/db";
 import { createId } from "@/lib/utils";
 import { makeTask, taskFromTemplateItem } from "@/lib/tasks";
 import type { TaskDraft, Template } from "@/types";
@@ -12,32 +12,32 @@ export async function commitTask(
   dateKey: string,
   draft: TaskDraft,
 ): Promise<void> {
-  let recurringId: string | null = null;
+  await db.transaction("rw", db.recurring, db.days, async () => {
+    let recurringId: string | null = null;
+    if (draft.recurrence !== "none") {
+      recurringId = createId();
+      await db.recurring.add({
+        id: recurringId,
+        title: draft.title.trim(),
+        category: draft.category,
+        priority: draft.priority,
+        color: draft.color,
+        notes: draft.notes.trim(),
+        rule: draft.recurrence,
+        createdAt: Date.now(),
+      });
+    }
 
-  if (draft.recurrence !== "none") {
-    recurringId = createId();
-    await db.recurring.add({
-      id: recurringId,
-      title: draft.title.trim(),
-      category: draft.category,
-      priority: draft.priority,
-      color: draft.color,
-      notes: draft.notes.trim(),
-      rule: draft.recurrence,
-      createdAt: Date.now(),
-    });
-  }
-
-  await updateDay(dateKey, (d) => {
-    const task = makeTask(draft, d.tasks.length);
-    const linked = recurringId ? { ...task, recurringId } : task;
-    return {
-      ...d,
-      tasks: [...d.tasks, linked],
+    const day = (await db.days.get(dateKey)) ?? emptyDay(dateKey);
+    const task = makeTask(draft, day.tasks.length);
+    await db.days.put({
+      ...day,
+      tasks: [...day.tasks, recurringId ? { ...task, recurringId } : task],
       recurringApplied: recurringId
-        ? [...d.recurringApplied, recurringId]
-        : d.recurringApplied,
-    };
+        ? [...day.recurringApplied, recurringId]
+        : day.recurringApplied,
+      updatedAt: Date.now(),
+    });
   });
 }
 

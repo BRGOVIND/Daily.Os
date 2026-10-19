@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { spring } from "@/lib/motion";
@@ -33,9 +33,9 @@ import type {
 } from "@/types";
 
 interface TaskFormProps {
-  onSubmit: (draft: TaskDraft) => void;
+  onSubmit: (draft: TaskDraft) => void | Promise<void>;
   onCancel: () => void;
-  onUseTemplate: (template: Template) => void;
+  onUseTemplate: (template: Template) => void | Promise<void>;
   templates: Template[];
   missions?: Mission[];
   dateLabel: string;
@@ -111,6 +111,39 @@ export function TaskForm({
 
   const [reminderKey, setReminderKey] = useState("none");
   const [reminderTime, setReminderTime] = useState("09:00");
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [actionPending, setActionPending] = useState(false);
+  const submittingRef = useRef(false);
+
+  const submit = handleSubmit(async (draft) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setActionPending(true);
+    setSaveError(null);
+    try {
+      await onSubmit(cleanDraft(draft));
+    } catch {
+      submittingRef.current = false;
+      setActionPending(false);
+      setSaveError("Could not save task. Please try again.");
+    }
+  });
+
+  const applySelectedTemplate = async (template: Template) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setActionPending(true);
+    setSaveError(null);
+    try {
+      await onUseTemplate(template);
+    } catch {
+      submittingRef.current = false;
+      setActionPending(false);
+      setSaveError("Could not apply template. Please try again.");
+    }
+  };
 
   const applyReminder = (key: string, time: string) => {
     setReminderKey(key);
@@ -119,8 +152,8 @@ export function TaskForm({
 
   return (
     <form
-      onSubmit={handleSubmit((d) => onSubmit(cleanDraft(d)))}
-      className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-y-auto p-6 sm:p-8"
+      onSubmit={submit}
+      className="flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-y-auto p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:p-8"
     >
       <header>
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
@@ -130,35 +163,6 @@ export function TaskForm({
           Add to {dateLabel}
         </h2>
       </header>
-
-      {/* Templates */}
-      {templates.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Label>Use a template</Label>
-          <div className="flex flex-wrap gap-2">
-            {templates.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => onUseTemplate(t)}
-                className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3 py-1.5 text-sm text-ink transition-all hover:border-accent/40 hover:shadow-soft"
-              >
-                <span aria-hidden>{t.icon}</span>
-                {t.name}
-                <span className="text-xs text-ink-muted/70">
-                  +{t.items.length}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="relative py-1 text-center">
-            <span className="relative z-10 bg-card px-3 text-[11px] uppercase tracking-widest text-ink-muted/60">
-              or add one
-            </span>
-            <span className="absolute inset-x-0 top-1/2 h-px bg-line" />
-          </div>
-        </div>
-      )}
 
       {/* Title */}
       <div className="flex flex-col gap-2">
@@ -174,282 +178,343 @@ export function TaskForm({
           })}
         />
         {errors.title && (
-          <span className="text-xs text-accent">{errors.title.message}</span>
+          <span className="text-xs text-alert">{errors.title.message}</span>
         )}
       </div>
 
-      {/* Category + Priority */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="category">Category</Label>
-          <Select
-            id="category"
-            options={CATEGORIES.map((c) => ({ value: c, label: c }))}
-            {...register("category")}
-          />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting || actionPending}>
+            {isSubmitting ? "Saving…" : "Save task"}
+          </Button>
         </div>
-
-        <div className="flex flex-col gap-2">
-          <Label>Priority</Label>
-          <Controller
-            control={control}
-            name="priority"
-            render={({ field }) => (
-              <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-canvas p-1">
-                {PRIORITIES.map((p) => (
-                  <SegChip
-                    key={p.key}
-                    label={p.label}
-                    active={field.value === p.key}
-                    onSelect={() => field.onChange(p.key as Priority)}
-                    layoutId="priority-pill"
-                  />
-                ))}
-              </div>
-            )}
-          />
+        <div className="flex items-center gap-3 text-sm">
+          {templates.length > 0 && (
+            <button
+              type="button"
+              aria-expanded={templatesOpen}
+              aria-controls="task-templates"
+              onClick={() => setTemplatesOpen((value) => !value)}
+              className="min-h-11 font-medium text-ink-muted underline-offset-4 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              Templates
+            </button>
+          )}
+          <button
+            type="button"
+            aria-expanded={detailsOpen}
+            aria-controls="task-details"
+            onClick={() => setDetailsOpen((value) => !value)}
+            className="min-h-11 font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            More options
+          </button>
         </div>
       </div>
 
-      {/* Smart details — optional metadata the Intelligence Engine uses to
-          prioritise and plan. Everything here is safe to leave blank. */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-canvas/50 p-3.5">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted/80">
-          Smart details · optional
+      {saveError && (
+        <p role="alert" className="text-sm text-alert">
+          {saveError}
         </p>
+      )}
 
-        {/* Estimate */}
-        <div className="flex flex-col gap-2">
-          <Label className="flex items-center gap-1.5">
-            <Timer className="h-3.5 w-3.5" /> Estimated time
-          </Label>
-          <Controller
-            control={control}
-            name="estimatedMinutes"
-            render={({ field }) => (
-              <div className="flex flex-wrap items-center gap-1.5">
-                {ESTIMATE_OPTIONS.map((o) => (
-                  <PillToggle
-                    key={o.minutes}
-                    label={o.label}
-                    active={field.value === o.minutes}
-                    onSelect={() =>
-                      field.onChange(
-                        field.value === o.minutes ? undefined : o.minutes,
-                      )
-                    }
-                  />
-                ))}
-                <input
-                  type="number"
-                  min={0}
-                  step={5}
-                  inputMode="numeric"
-                  placeholder="min"
-                  value={field.value ?? ""}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value === "" ? undefined : Number(e.target.value),
-                    )
-                  }
-                  className="h-9 w-20 rounded-lg border border-line bg-card px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+      {templatesOpen && templates.length > 0 && (
+        <div id="task-templates" className="flex flex-col gap-2 border-t border-line pt-4">
+          <Label>Use a template</Label>
+          <div className="flex flex-wrap gap-2">
+            {templates.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => void applySelectedTemplate(t)}
+                disabled={actionPending}
+                className="flex min-h-10 items-center gap-1.5 rounded-full border border-line bg-card px-3 text-sm text-ink transition-all hover:border-accent/40 hover:shadow-soft"
+              >
+                <span aria-hidden>{t.icon}</span>
+                {t.name}
+                <span className="text-xs text-ink-muted">+{t.items.length}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {detailsOpen && (
+        <div id="task-details" className="flex flex-col gap-5 border-t border-line pt-4">
+          {/* Category + Priority */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                id="category"
+                options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+                {...register("category")}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label>Priority</Label>
+              <Controller
+                control={control}
+                name="priority"
+                render={({ field }) => (
+                  <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-canvas p-1">
+                    {PRIORITIES.map((p) => (
+                      <SegChip
+                        key={p.key}
+                        label={p.label}
+                        active={field.value === p.key}
+                        onSelect={() => field.onChange(p.key as Priority)}
+                        layoutId="priority-pill"
+                      />
+                    ))}
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Smart details — optional metadata the Intelligence Engine uses to
+              prioritise and plan. Everything here is safe to leave blank. */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-line bg-canvas/50 p-3.5">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted">
+              Smart details · optional
+            </p>
+
+            {/* Estimate */}
+            <div className="flex flex-col gap-2">
+              <Label className="flex items-center gap-1.5">
+                <Timer className="h-3.5 w-3.5" /> Estimated time
+              </Label>
+              <Controller
+                control={control}
+                name="estimatedMinutes"
+                render={({ field }) => (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {ESTIMATE_OPTIONS.map((o) => (
+                      <PillToggle
+                        key={o.minutes}
+                        label={o.label}
+                        active={field.value === o.minutes}
+                        onSelect={() =>
+                          field.onChange(
+                            field.value === o.minutes ? undefined : o.minutes,
+                          )
+                        }
+                      />
+                    ))}
+                    <input
+                      type="number"
+                      min={0}
+                      step={5}
+                      inputMode="numeric"
+                      placeholder="min"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? undefined : Number(e.target.value),
+                        )
+                      }
+                      className="h-9 w-20 rounded-lg border border-line bg-card px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+                    />
+                  </div>
+                )}
+              />
+            </div>
+
+            {/* Energy + Difficulty */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label className="flex items-center gap-1.5">
+                  <Gauge className="h-3.5 w-3.5" /> Energy
+                </Label>
+                <Controller
+                  control={control}
+                  name="energy"
+                  render={({ field }) => (
+                    <div className="flex flex-wrap gap-1.5">
+                      {ENERGY_OPTIONS.map((o) => (
+                        <PillToggle
+                          key={o.key}
+                          label={o.label}
+                          active={field.value === o.key}
+                          onSelect={() =>
+                            field.onChange(
+                              field.value === o.key ? undefined : (o.key as EnergyLevel),
+                            )
+                          }
+                        />
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Difficulty</Label>
+                <Controller
+                  control={control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <div className="flex flex-wrap gap-1.5">
+                      {DIFFICULTY_OPTIONS.map((o) => (
+                        <PillToggle
+                          key={o.key}
+                          label={o.label}
+                          active={field.value === o.key}
+                          onSelect={() =>
+                            field.onChange(
+                              field.value === o.key
+                                ? undefined
+                                : (o.key as Difficulty),
+                            )
+                          }
+                        />
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Deadline */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="deadline" className="flex items-center gap-1.5">
+                <CalendarClock className="h-3.5 w-3.5" /> Deadline
+              </Label>
+              <input
+                id="deadline"
+                type="date"
+                {...register("deadline")}
+                className="h-9 w-full max-w-[12rem] rounded-lg border border-line bg-card px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+              />
+            </div>
+
+            {/* Mission link */}
+            {activeMissions.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="missionId" className="flex items-center gap-1.5">
+                  <Rocket className="h-3.5 w-3.5" /> Mission
+                </Label>
+                <Select
+                  id="missionId"
+                  options={[
+                    { value: "", label: "No mission" },
+                    ...activeMissions.map((m) => ({
+                      value: m.id,
+                      label: `${m.icon} ${m.title}`,
+                    })),
+                  ]}
+                  {...register("missionId")}
                 />
               </div>
             )}
-          />
-        </div>
+          </div>
 
-        {/* Energy + Difficulty */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Recurrence */}
           <div className="flex flex-col gap-2">
             <Label className="flex items-center gap-1.5">
-              <Gauge className="h-3.5 w-3.5" /> Energy
+              <Repeat className="h-3.5 w-3.5" /> Repeat
             </Label>
             <Controller
               control={control}
-              name="energy"
+              name="recurrence"
               render={({ field }) => (
                 <div className="flex flex-wrap gap-1.5">
-                  {ENERGY_OPTIONS.map((o) => (
+                  {RECURRENCE_OPTIONS.map((o) => (
                     <PillToggle
                       key={o.key}
                       label={o.label}
                       active={field.value === o.key}
-                      onSelect={() =>
-                        field.onChange(
-                          field.value === o.key ? undefined : (o.key as EnergyLevel),
-                        )
-                      }
+                      onSelect={() => field.onChange(o.key as RecurrenceRule)}
                     />
                   ))}
                 </div>
               )}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label>Difficulty</Label>
-            <Controller
-              control={control}
-              name="difficulty"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-1.5">
-                  {DIFFICULTY_OPTIONS.map((o) => (
-                    <PillToggle
-                      key={o.key}
-                      label={o.label}
-                      active={field.value === o.key}
-                      onSelect={() =>
-                        field.onChange(
-                          field.value === o.key
-                            ? undefined
-                            : (o.key as Difficulty),
-                        )
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-            />
-          </div>
-        </div>
 
-        {/* Deadline */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="deadline" className="flex items-center gap-1.5">
-            <CalendarClock className="h-3.5 w-3.5" /> Deadline
-          </Label>
-          <input
-            id="deadline"
-            type="date"
-            {...register("deadline")}
-            className="h-9 w-full max-w-[12rem] rounded-lg border border-line bg-card px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
-          />
-        </div>
-
-        {/* Mission link */}
-        {activeMissions.length > 0 && (
+          {/* Reminder */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="missionId" className="flex items-center gap-1.5">
-              <Rocket className="h-3.5 w-3.5" /> Mission
+            <Label className="flex items-center gap-1.5">
+              <Bell className="h-3.5 w-3.5" /> Reminder
             </Label>
-            <Select
-              id="missionId"
-              options={[
-                { value: "", label: "No mission" },
-                ...activeMissions.map((m) => ({
-                  value: m.id,
-                  label: `${m.icon} ${m.title}`,
-                })),
-              ]}
-              {...register("missionId")}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Recurrence */}
-      <div className="flex flex-col gap-2">
-        <Label className="flex items-center gap-1.5">
-          <Repeat className="h-3.5 w-3.5" /> Repeat
-        </Label>
-        <Controller
-          control={control}
-          name="recurrence"
-          render={({ field }) => (
-            <div className="flex flex-wrap gap-1.5">
-              {RECURRENCE_OPTIONS.map((o) => (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {REMINDER_OPTIONS.map((o) => (
                 <PillToggle
                   key={o.key}
                   label={o.label}
-                  active={field.value === o.key}
-                  onSelect={() => field.onChange(o.key as RecurrenceRule)}
+                  active={reminderKey === o.key}
+                  onSelect={() => applyReminder(o.key, reminderTime)}
                 />
               ))}
+              {reminderKey === "time" && (
+                <input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => {
+                    setReminderTime(e.target.value);
+                    applyReminder("time", e.target.value);
+                  }}
+                  className="h-9 rounded-lg border border-line bg-canvas px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+                />
+              )}
             </div>
-          )}
-        />
-      </div>
+          </div>
 
-      {/* Reminder */}
-      <div className="flex flex-col gap-2">
-        <Label className="flex items-center gap-1.5">
-          <Bell className="h-3.5 w-3.5" /> Reminder
-        </Label>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {REMINDER_OPTIONS.map((o) => (
-            <PillToggle
-              key={o.key}
-              label={o.label}
-              active={reminderKey === o.key}
-              onSelect={() => applyReminder(o.key, reminderTime)}
+          {/* Color */}
+          <div className="flex flex-col gap-2">
+            <Label>Color</Label>
+            <Controller
+              control={control}
+              name="color"
+              render={({ field }) => (
+                <div className="flex flex-wrap gap-2.5">
+                  {TASK_COLORS.map((c) => (
+                    <button
+                      key={c.key}
+                      type="button"
+                      onClick={() => field.onChange(c.key as TaskColor)}
+                      aria-label={c.label}
+                      aria-pressed={field.value === c.key}
+                      className="flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                      style={
+                        field.value === c.key
+                          ? { boxShadow: `0 0 0 2px ${c.dot}` }
+                          : undefined
+                      }
+                    >
+                      <span
+                        className="h-6 w-6 rounded-full"
+                        style={{ backgroundColor: c.dot }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             />
-          ))}
-          {reminderKey === "time" && (
-            <input
-              type="time"
-              value={reminderTime}
-              onChange={(e) => {
-                setReminderTime(e.target.value);
-                applyReminder("time", e.target.value);
-              }}
-              className="h-9 rounded-lg border border-line bg-canvas px-2 text-sm text-ink focus:border-accent/50 focus:outline-none"
+          </div>
+
+          {/* Notes */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              rows={3}
+              placeholder="Optional details…"
+              {...register("notes")}
             />
-          )}
+          </div>
+
+          <div className="mt-1 flex items-center justify-end gap-3">
+            <Button type="submit" disabled={isSubmitting || actionPending}>
+              {isSubmitting ? "Saving…" : "Save task"}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      {/* Color */}
-      <div className="flex flex-col gap-2">
-        <Label>Color</Label>
-        <Controller
-          control={control}
-          name="color"
-          render={({ field }) => (
-            <div className="flex flex-wrap gap-2.5">
-              {TASK_COLORS.map((c) => (
-                <button
-                  key={c.key}
-                  type="button"
-                  onClick={() => field.onChange(c.key as TaskColor)}
-                  aria-label={c.label}
-                  aria-pressed={field.value === c.key}
-                  className="flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-                  style={
-                    field.value === c.key
-                      ? { boxShadow: `0 0 0 2px ${c.dot}` }
-                      : undefined
-                  }
-                >
-                  <span
-                    className="h-6 w-6 rounded-full"
-                    style={{ backgroundColor: c.dot }}
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        />
-      </div>
-
-      {/* Notes */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea
-          id="notes"
-          rows={3}
-          placeholder="Optional details…"
-          {...register("notes")}
-        />
-      </div>
-
-      <div className="mt-1 flex items-center justify-end gap-3">
-        <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          Save task
-        </Button>
-      </div>
+      )}
     </form>
   );
 }

@@ -11,8 +11,8 @@ interface AddTaskModalProps {
   templates: Template[];
   missions?: Mission[];
   onOpenChange: (open: boolean) => void;
-  onSubmit: (draft: TaskDraft) => void;
-  onUseTemplate: (template: Template) => void;
+  onSubmit: (draft: TaskDraft) => void | Promise<void>;
+  onUseTemplate: (template: Template) => void | Promise<void>;
 }
 
 /** Centered, animated task composer bound to a specific day. */
@@ -45,13 +45,13 @@ export function AddTaskModal({
         targetDate={targetDate}
         templates={templates}
         missions={missions}
-        onUseTemplate={(t) => {
-          onUseTemplate(t);
+        onUseTemplate={async (t) => {
+          await onUseTemplate(t);
           onOpenChange(false);
         }}
         onCancel={() => onOpenChange(false)}
-        onSubmit={(draft) => {
-          onSubmit(draft);
+        onSubmit={async (draft) => {
+          await onSubmit(draft);
           onOpenChange(false);
         }}
       />

@@ -8,6 +8,7 @@ const isTauriBuild =
 
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: { root: process.cwd() },
   ...(isTauriBuild
     ? {
         output: "export",

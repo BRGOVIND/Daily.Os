@@ -8,11 +8,9 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
-  // Match Next.js's automatic JSX runtime so component render smoke tests don't
-  // need an explicit `import React` (which the app never uses).
-  esbuild: { jsx: "automatic" },
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
+    maxWorkers: 2,
     // Node by default (pure-logic tests); DOM tests opt in per-file with
     // `// @vitest-environment jsdom`.
     environment: "node",
