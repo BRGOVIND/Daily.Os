@@ -78,6 +78,9 @@ export function Onboarding({ onCreate, onGuest }: OnboardingProps) {
         >
           Continue as Guest
         </button>
+        <p className="mt-2 text-xs text-ink-muted">
+          Guest data clears on reload. Create a profile to keep it.
+        </p>
       </motion.div>
     </div>
   );
