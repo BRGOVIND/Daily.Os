@@ -41,17 +41,28 @@ export function DataSection() {
   const [result, setResult] = useState<{ mode: ImportMode; summary: BundleSummary } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const runExport = async () => {
-    const full = await exportAll();
-    if (scope === "all") return downloadExport(full, "backup");
-    if (scope === "missions") return downloadExport(missionsOnlyBundle(full), "missions");
-    if (scope === "journal") return downloadExport(journalOnlyBundle(full), "journal");
-    const ws = workspaces.find((w) => w.id === scope);
-    if (ws) {
-      const slug = ws.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      downloadExport(scopeBundleToWorkspace(full, ws.id), `workspace-${slug || "export"}`);
+    if (exporting) return;
+    setExporting(true);
+    setError(null);
+    try {
+      const full = await exportAll();
+      if (scope === "all") downloadExport(full, "backup");
+      else if (scope === "missions") downloadExport(missionsOnlyBundle(full), "missions");
+      else if (scope === "journal") downloadExport(journalOnlyBundle(full), "journal");
+      else {
+        const ws = workspaces.find((w) => w.id === scope);
+        if (!ws) throw new Error("Selected workspace is unavailable");
+        const slug = ws.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        downloadExport(scopeBundleToWorkspace(full, ws.id), `workspace-${slug || "export"}`);
+      }
+    } catch {
+      setError("Export failed. Please try again.");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -70,11 +81,17 @@ export function DataSection() {
   const doImport = async (mode: ImportMode) => {
     if (!pending || busy) return;
     setBusy(true);
-    const res = await importBundle(pending.bundle, mode);
-    setBusy(false);
-    setPending(null);
-    setResult(res);
-    setTimeout(() => setResult(null), 6000);
+    setError(null);
+    try {
+      const res = await importBundle(pending.bundle, mode);
+      setPending(null);
+      setResult(res);
+      setTimeout(() => setResult(null), 6000);
+    } catch {
+      setError("Import failed. Check your data before retrying.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const conflictTotal = pending
@@ -86,6 +103,7 @@ export function DataSection() {
       {/* Export */}
       <div className="flex flex-wrap items-center gap-2">
         <Select
+          aria-label="Export scope"
           value={scope}
           onChange={(e) => setScope(e.target.value)}
           className="h-9 w-auto text-[14px]"
@@ -98,8 +116,8 @@ export function DataSection() {
               .map((w) => ({ value: w.id, label: `Workspace: ${w.name}` })),
           ]}
         />
-        <Button variant="secondary" size="sm" onClick={runExport}>
-          <Download className="h-4 w-4" /> Export
+        <Button variant="secondary" size="sm" onClick={runExport} disabled={exporting}>
+          <Download className="h-4 w-4" /> {exporting ? "Exporting…" : "Export"}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()}>
           <Upload className="h-4 w-4" /> Import
@@ -137,10 +155,14 @@ export function DataSection() {
             <Count n={pending.summary.notes} label="notes" />
             <Count n={pending.summary.resources} label="resources" />
             <Count n={pending.summary.journal} label="journal" />
+            <Count n={pending.summary.quickNotes} label="quick notes" />
+            <Count n={pending.summary.stickyNotes} label="sticky notes" />
+            <Count n={pending.summary.pomodoroSessions} label="focus sessions" />
+            <Count n={pending.summary.utilities} label="utilities" />
           </div>
 
           {conflictTotal > 0 && (
-            <p className="flex items-start gap-1.5 rounded-lg bg-warning/10 px-3 py-2 text-[13px] text-[#8A6100]">
+            <p className="flex items-start gap-1.5 rounded-lg bg-warning/10 px-3 py-2 text-[13px] text-ink">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               {conflictTotal} record{conflictTotal === 1 ? "" : "s"} already exist here.
               Merge keeps both (tasks are combined per day); Replace overwrites everything.
