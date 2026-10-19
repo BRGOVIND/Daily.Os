@@ -83,7 +83,7 @@ export function ProfilesSection() {
                 {profile.name}
               </p>
               {isGuest && (
-                <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#8A6100]">
+                <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink">
                   Guest
                 </span>
               )}
@@ -103,7 +103,7 @@ export function ProfilesSection() {
             </div>
           )}
           <p className="text-[13px] text-ink-muted">
-            {isGuest ? "Temporary workspace — nothing is saved" : "This device only"}
+            {isGuest ? "Guest data clears on reload" : "This device only"}
           </p>
         </div>
       </div>
@@ -194,10 +194,10 @@ export function ProfilesSection() {
               </label>
             )}
             <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" onClick={() => setCreating(false)}>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setCreating(false)}>
                 Cancel
               </Button>
-              <Button size="sm" onClick={submitCreate}>
+              <Button type="submit" size="sm">
                 Create profile
               </Button>
             </div>
