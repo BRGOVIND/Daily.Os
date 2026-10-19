@@ -41,8 +41,6 @@ No login.
 
 No ads.
 
-No AI chat popping up everywhere.
-
 Just a calm place to organize your day.
 
 I didn't build Daily OS for my résumé.
@@ -147,7 +145,7 @@ The project includes detailed documentation inside the `docs/` folder.
 
 - Architecture
 - Design System
-- Intelligence Engine
+- Planning Engine
 - Workspace OS
 - Native Desktop
 - Collaboration
@@ -199,8 +197,8 @@ No tracking.
 Some ideas for the future:
 
 - Optional end-to-end encrypted sync
-- AI planning assistant (optional)
-- Local AI integrations
+- Clearer planning summaries
+- More useful weekly reviews
 - Better recurring tasks
 - Better reminders
 - More themes

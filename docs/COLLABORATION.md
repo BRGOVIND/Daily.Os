@@ -34,7 +34,7 @@ Dexie v5: identity · members · comments · activity · outbox
 ```
 
 The domain layer imports only `@/types` and its own modules — never React or
-Dexie — mirroring the Intelligence Engine and Workspace OS. The UI depends on the
+Dexie — mirroring the Planning Engine and Workspace OS. The UI depends on the
 `AuthProvider` and `SyncTransport` **interfaces**, never on a concrete provider
 (Module 1: "do not tightly couple UI to any provider").
 

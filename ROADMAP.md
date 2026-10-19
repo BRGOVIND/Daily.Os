@@ -28,7 +28,7 @@ strengthen the calm, calendar-native core — never to chase a checklist.
 ## Explicitly out of scope
 
 To protect the product's calm identity, Daily OS will **not** add: accounts or
-login, a required backend, AI assistants, chat, Kanban boards, a left sidebar,
+login, a required backend, Kanban boards, a left sidebar,
 project hierarchies, or analytics/tracking.
 
 Have an idea? Open a

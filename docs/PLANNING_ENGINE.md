@@ -1,15 +1,13 @@
-# Intelligence Engine
+# Planning Engine
 
-Daily OS's Intelligence Engine is a self-contained domain that turns a snapshot
+Daily OS's Planning Engine is a self-contained domain that turns a snapshot
 of your data — days, tasks, habits and missions — into planning, prioritisation
-and coaching outputs. It is what makes Daily OS behave like a quiet productivity
-coach rather than a passive to-do list.
+and weekly review summaries. It helps turn daily activity into a clearer plan.
 
 Three principles shape it:
 
-1. **Algorithms first, AI never (yet).** Everything here is deterministic maths
-   and template strings. There is **no AI, no network, no model** — the engine
-   runs fully offline and produces the same output for the same input.
+1. **Deterministic and offline.** The engine uses calculations and template
+   strings, producing the same output for the same input.
 2. **Isolated from the UI.** The engine lives entirely under `src/engine/` and
    depends only on `@/types`, `date-fns` and its own modules. It imports nothing
    from React, Dexie or any component. The UI *consumes* its outputs; it never
@@ -31,7 +29,7 @@ src/engine/
   utils/
     math.ts                # clamp, mean, pct, round
     time.ts                # day-part mapping, hour formatting
-    tasks.ts               # defaulting accessors over smart-task metadata
+    tasks.ts               # defaulting accessors over optional task metadata
   prediction/
     priority.ts            # Module 3 — calculated priority + distribution
     estimation.ts          # Module 9 — committed-minute totals
@@ -40,7 +38,7 @@ src/engine/
     productivity.ts        # Module 5 — blended productivity score
     energy.ts              # Module 6 — when you do your best work
     burnout.ts             # Module 7 — unsustainable-pattern detection
-    coach.ts               # Module 8 — weekly template insights
+    review.ts              # Module 8 — weekly template insights
   planner/
     planner.ts             # Module 2 — recommended day schedule
   recommendation/
@@ -50,7 +48,7 @@ src/engine/
 
 The app touches the engine through two thin hooks:
 
-- `useIntelligence(today)` runs `buildIntelligenceReport` over the live database,
+- `usePlanningReport(today)` runs `buildPlanningReport` over the live database,
   memoized so the (non-trivial) computation only re-runs when days, habits or
   missions actually change.
 - `usePlanner(dateKey, today)` builds a recommended schedule for a single day.
@@ -62,7 +60,7 @@ annotated one — no special cases anywhere in the engine.
 
 ---
 
-## The smart task model
+## Optional task details
 
 Phase 4 extended `Task` with optional, back-compatible metadata:
 
@@ -193,13 +191,13 @@ never intrusive.
 
 ---
 
-## Module 8 — Weekly Coach
+## Module 8 — Weekly Review
 
-`weeklyCoach(today, byDate, habits, windowTasks)` compares the last 7 days to the
+`weeklyReview(today, byDate, habits, windowTasks)` compares the last 7 days to the
 7 before and assembles insights from **string templates** — most/least
 productive day, most consistent habit, a declining habit, repeatedly postponed
-tasks, and a versus-last-week improvement figure. **No AI**: it is pure numeric
-comparison wrapped in sentence templates.
+tasks, and a versus-last-week improvement figure. It uses numeric comparison
+wrapped in sentence templates.
 
 ---
 
@@ -220,10 +218,10 @@ surface. Deleting a mission transactionally detaches its tasks.
 
 ## New statistics
 
-The engine's `IntelligenceReport` powers a new **Intelligence** panel in the
+The engine's `PlanningReport` powers a new **Planning** panel in the
 statistics journal: productivity score with component breakdown and reasons,
 workload buckets with move suggestions, priority distribution, the energy
-histogram with the peak window highlighted, weekly coach insights, a wellbeing /
+histogram with the peak window highlighted, weekly review insights, a wellbeing /
 burnout readout, and mission progress bars — all rendered from engine output,
 none recomputed in the UI.
 
@@ -231,7 +229,7 @@ none recomputed in the UI.
 
 ## Performance considerations
 
-- **Single-pass reads.** `useIntelligence` reads days, habits and missions once
+- **Single-pass reads.** `usePlanningReport` reads days, habits and missions once
   and builds the whole report inside one `useMemo`, keyed on those arrays — the
   computation only re-runs when the underlying data actually changes.
 - **Inert when closed.** Both hooks read and compute nothing while their host
@@ -258,24 +256,3 @@ The database moved to **v3**:
   un-backfilled task still scores correctly.
 - Export/import (`backup.ts`) now round-trips missions and tolerates their
   absence in older bundles.
-
----
-
-## Future AI integration points
-
-Every module is a pure function with a typed output, which makes each a clean
-seam for an optional future model — **without** changing the offline default:
-
-- **Priority** — `computePriority` could accept a learned per-user weight vector
-  in place of the fixed `PRIORITY_FACTOR_WEIGHTS`.
-- **Planner** — `buildDayPlan`'s placement heuristics could be replaced or
-  re-ranked by a model, still emitting the same `DayPlan` shape.
-- **Energy** — the peak-window detector could give way to a learned personal
-  rhythm curve.
-- **Coach & Burnout** — template strings could be swapped for generated prose
-  behind the same `CoachInsight` / `BurnoutReport` contracts.
-- **Estimation** — `estMinutes` could return a model's predicted duration from
-  historical actuals instead of the user's estimate.
-
-An AI layer would sit *behind* these interfaces and remain entirely optional.
-The engine must always function fully offline, exactly as it does today.

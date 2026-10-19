@@ -4,14 +4,14 @@ Phase 5 turns Daily OS from a planner into a **personal operating system**. The
 organising idea changes from *"plan your day"* to *"manage your entire life and
 work from one application"* — and everything now revolves around **workspaces**.
 
-The same three principles that shaped the Intelligence Engine hold here:
+The same three principles that shaped the Planning Engine hold here:
 
-1. **Offline, private, deterministic.** No AI, no chat, no cloud sync, no auth,
-   no RAG. Every workspace view is computed locally from IndexedDB and produces
-   the same output for the same input.
+1. **Offline, private, deterministic.** No cloud sync or auth. Every workspace
+   view is computed locally from IndexedDB and produces the same output for the
+   same input.
 2. **Logic isolated from UI.** The workspace domain lives entirely under
    `src/workspace/` and depends only on `@/types`, small `@/lib` leaf helpers,
-   the Intelligence Engine's pure exports and `date-fns`. It imports nothing from
+   the Planning Engine's pure exports and `date-fns`. It imports nothing from
    React, Dexie or any component. The UI *consumes* its outputs.
 3. **Derive, don't duplicate.** Timelines, graphs, search results and statistics
    are computed on read from the data that already exists — never stored — so
@@ -180,8 +180,8 @@ tab.
 
 ## Module 9 — Knowledge Graph
 
-`buildGraph(snapshot, workspace)` produces a lightweight relationship map — **no
-AI, no embeddings**. The workspace sits at the centre, missions on an inner ring,
+`buildGraph(snapshot, workspace)` produces a lightweight relationship map from
+saved data. The workspace sits at the centre, missions on an inner ring,
 each mission's milestones and linked tasks orbiting it, and loose knowledge
 (notes, resources, journal) on an outer ring. Coordinates are deterministic and
 normalized to a `[-1, 1]` square; the SVG view highlights a node's neighbours on
@@ -228,23 +228,3 @@ The database moved to **v4**:
 
 Nothing about pre-Phase-5 data breaks: every new field is optional and every new
 table is additive.
-
----
-
-## Future AI integration points
-
-Every module is a pure function behind a typed contract, so a model could later
-sit *behind* these interfaces without changing output shapes or the offline
-default:
-
-- **Search** — `universalSearch` could be re-ranked by semantic similarity while
-  still returning the same `SearchGroup[]`.
-- **Graph** — edges are currently structural; a model could add *suggested*
-  relationships (related notes, similar resources) as extra `GraphEdge`s.
-- **Timeline** — an optional summariser could fold a day's events into a
-  sentence, layered on top of the derived `TimelineEvent[]`.
-- **Notes / Journal** — writing assistance could be offered inside the editor
-  without changing the stored block / entry shapes.
-
-An AI layer would remain entirely optional. Workspace OS must always function
-fully offline, exactly as it does today.

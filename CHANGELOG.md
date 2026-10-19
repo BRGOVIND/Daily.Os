@@ -56,9 +56,9 @@ Workspaces as top-level containers; project notes (block editor), resource
 library, structured journal, auto-built timeline, knowledge graph, per-workspace
 dashboard & stats, and universal `⌘K` search. Dexie **v4** migration.
 
-## v2.0.0 — Intelligence Engine
+## v2.0.0 — Planning Engine
 Isolated `src/engine/` domain: automatic priority, planner, workload analyzer,
-productivity score, energy analysis, burnout detection, weekly coach, time
+productivity score, energy analysis, burnout detection, weekly review, time
 estimation and Mission Mode. Dexie **v3** migration.
 
 ## v1.0.0 — Initial release

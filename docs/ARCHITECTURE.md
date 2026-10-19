@@ -2,7 +2,7 @@
 
 Daily OS is an **offline-first, single-user, no-backend** personal operating
 system. Everything runs in the browser; all data lives in IndexedDB. There is no
-server, no authentication, no cloud sync and no AI.
+server, no authentication and no cloud sync.
 
 ---
 
@@ -35,11 +35,11 @@ src/
     tasks/ habits/ templates/ review/
     missions/          # Mission Mode surface
     workspace/         # Workspace OS hub + tabs + command palette
-    stats/             # statistics & intelligence panels
+    stats/             # statistics & planning panels
     layout/            # TopNav, Settings, Data, KeyboardHelp, Fab
     providers/         # MotionProvider (and future providers)
     profile/ pwa/ ui/  # profiles, PWA controller, primitive components
-  engine/              # Intelligence Engine — pure domain (Phase 4)
+  engine/              # Planning Engine — pure domain (Phase 4)
   workspace/           # Workspace OS — pure domain (Phase 5)
   hooks/               # React hooks bridging domains ↔ IndexedDB
   lib/                 # db, backup, constants, dates, motion, shortcuts, utils
@@ -51,9 +51,9 @@ docs/                  # this folder
 
 The heart of the app is two **UI-agnostic, offline, deterministic** domains:
 
-- **`src/engine/`** — the Intelligence Engine (priority, planner, workload,
-  productivity, energy, burnout, weekly coach, estimation, mission progress).
-  See `INTELLIGENCE_ENGINE.md`.
+- **`src/engine/`** — the Planning Engine (priority, planner, workload,
+  productivity, energy, burnout, weekly review, estimation, mission progress).
+  See `PLANNING_ENGINE.md`.
 - **`src/workspace/`** — Workspace OS (notes, journal, resources, timeline,
   universal search, knowledge graph, stats, dashboard). See `WORKSPACE_OS.md`.
 
@@ -110,10 +110,8 @@ bloated suite. Candidate directions, all optional and all offline:
 
 - Dark theme (tokens already CSS-variable-driven).
 - Richer analytics (mission/workspace trend lines, planner efficiency).
-- An optional AI layer *behind* the existing pure interfaces (see each domain's
-  "Future AI integration points"). It would never be required; the app must
-  always work fully offline.
+- Clearer planning summaries built from the existing offline data.
 - Guided first-run onboarding that creates a first workspace, mission and task.
 
-See `../docs/INTELLIGENCE_ENGINE.md` and `../docs/WORKSPACE_OS.md` for the two
+See `../docs/PLANNING_ENGINE.md` and `../docs/WORKSPACE_OS.md` for the two
 domains, and `DESIGN_SYSTEM.md` for the visual language.

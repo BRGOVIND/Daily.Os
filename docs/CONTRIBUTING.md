@@ -5,8 +5,8 @@ consistent for anyone (including future-you) working on it.
 
 ## Ground rules
 
-- **Offline-first, always.** No backend, no auth, no cloud sync, no AI, no RAG,
-  no chat. Every feature must work fully offline.
+- **Offline-first, always.** No backend, no auth or cloud sync.
+  Every feature must work fully offline.
 - **Don't bloat it.** Daily OS is at feature maturity. Prefer polishing existing
   surfaces over adding new ones.
 - **Type safety is non-negotiable.** `strict` TypeScript, **no `any`**. Model
@@ -58,4 +58,5 @@ npx next build     # production build
 ## Git
 
 Changes are reviewed and committed **manually** by the repository owner. Do not
-add co-author or AI-attribution trailers. Leave work unstaged unless asked.
+add attribution trailers without the contributor's consent. Leave work
+unstaged unless asked.

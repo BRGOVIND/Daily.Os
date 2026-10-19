@@ -48,9 +48,8 @@ a bloated suite. All items remain offline-first, private and backend-free.
 1. **Guided onboarding** that creates a first workspace, mission and task.
 2. **Richer, still-subtle analytics** — mission & workspace trend lines, planner
    efficiency, journal activity heatmap.
-3. **Optional AI layer behind the pure domain interfaces** — re-ranked search,
-   suggested graph links, timeline summaries — never required, never online by
-   default. See each domain doc's "Future AI integration points".
+3. **Clearer planning summaries** — improve the existing offline statistics and
+   workspace views without adding a backend.
 
 ## Version notes
 
