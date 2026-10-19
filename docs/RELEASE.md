@@ -7,8 +7,10 @@ Preparing Daily OS for public release.
 Run and confirm each before tagging a release:
 
 - [ ] `npx tsc --noEmit` — no type errors
-- [ ] `npx next lint` — no ESLint warnings or errors
-- [ ] `npx next build` — production build succeeds
+- [ ] `npm run lint` — no ESLint warnings or errors
+- [ ] `npm test` — domain and UI tests pass
+- [ ] `npm run build` — production build and offline service worker succeed
+- [ ] `NEXT_OUTPUT_EXPORT=1 npm run build` — desktop static export succeeds
 - [ ] **PWA** — installs; service worker registers; offline reload works
 - [ ] **Mobile** — bottom sheets, safe-area insets, 44px touch targets
 - [ ] **Desktop** — keyboard shortcuts (`⌘K`, `/`, `T`, `W`, `?`, `←/→`, `N`)
@@ -16,18 +18,19 @@ Run and confirm each before tagging a release:
 - [ ] **Search** — `⌘K` finds tasks, notes, missions, resources, journal
 - [ ] **Planner / Mission Mode / Timeline / Journal / Knowledge Graph** render
       with real data
-- [ ] **Backup** — full & scoped export download; import Merge and Replace both
-      behave; conflicts are reported
+- [ ] **Backup** — full & scoped export download, including quick notes, sticky
+      notes, focus sessions and utilities; import Merge and Replace both behave;
+      conflicts are reported
 - [ ] **Accessibility** — keyboard-only pass; reduced-motion toggle; high zoom
-- [ ] **Data safety** — a v3 (pre-Workspace-OS) database upgrades cleanly to v4
+- [ ] **Data safety** — a v3 (pre-Workspace-OS) database upgrades cleanly to v6
 - [ ] Update `CHANGELOG.md` and the version number
 
 ## Known limitations
 
 - **Single device.** No cloud sync by design — data lives in this browser's
   IndexedDB. Moving devices is a manual export → import.
-- **No dark theme yet.** Tokens are CSS-variable-driven so it's straightforward
-  to add; currently light-only.
+- **Guest mode is temporary.** Guest data clears on reload. Use a local profile
+  to keep it across visits.
 - **Timeline milestone timestamps are approximate.** Milestones carry no
   completion time of their own, so completed ones anchor to their mission's
   `updatedAt`.
@@ -42,16 +45,15 @@ Run and confirm each before tagging a release:
 Conservative and optional — Daily OS is at feature maturity and should not become
 a bloated suite. All items remain offline-first, private and backend-free.
 
-1. **Dark theme** using the existing token system.
-2. **Guided onboarding** that creates a first workspace, mission and task.
-3. **Richer, still-subtle analytics** — mission & workspace trend lines, planner
+1. **Guided onboarding** that creates a first workspace, mission and task.
+2. **Richer, still-subtle analytics** — mission & workspace trend lines, planner
    efficiency, journal activity heatmap.
-4. **Optional AI layer behind the pure domain interfaces** — re-ranked search,
+3. **Optional AI layer behind the pure domain interfaces** — re-ranked search,
    suggested graph links, timeline summaries — never required, never online by
    default. See each domain doc's "Future AI integration points".
 
 ## Version notes
 
-See `CHANGELOG.md`. This release ("Pro") adds no new product surface area; it
-raises quality: reduced motion, keyboard-first UX, backup/recovery, settings and
-documentation.
+See `CHANGELOG.md`. The current unreleased update adds phone navigation, faster
+task capture and a more complete offline cache. It also raises quality in
+accessibility, profile switching, backup/recovery and build checks.
