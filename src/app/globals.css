@@ -44,6 +44,11 @@
     --accent-hover: 236 140 168;
   }
 
+  /* Keep accent labels readable on charcoal surfaces for every accent preset. */
+  :root[data-theme="dark"] .text-accent {
+    color: color-mix(in srgb, rgb(var(--accent)) 55%, white);
+  }
+
   /* Warm Paper — cream ground, soft-brown ink, muted rose accent. */
   :root[data-theme="paper"] {
     color-scheme: light;
