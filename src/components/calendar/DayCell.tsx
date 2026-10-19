@@ -101,7 +101,7 @@ function DayCellBase({ cell, summary, onSelect, compact = false }: DayCellProps)
           className={cn(
             "flex items-center justify-center rounded-full tabular-nums",
             bubble,
-            inMonth ? "font-medium text-ink" : "text-ink-muted/40",
+            inMonth ? "font-medium text-ink" : "text-ink-muted",
           )}
         >
           {dayNumber}
