@@ -52,7 +52,7 @@ export function TemplateManager() {
             >
               <span aria-hidden>{t.icon}</span>
               {t.name}
-              <span className="text-xs text-ink-muted/70">+{t.items.length}</span>
+              <span className="text-xs text-ink-muted">+{t.items.length}</span>
               {!t.builtIn && (
                 <button
                   type="button"
