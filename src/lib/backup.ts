@@ -11,9 +11,13 @@ import type {
   JournalEntry,
   Member,
   Mission,
+  PomodoroSession,
+  QuickNote,
   RecurringTask,
   Resource,
+  StickyNote,
   Template,
+  UtilityRecord,
   Workspace,
   WorkspaceNote,
 } from "@/types";
@@ -43,10 +47,14 @@ export async function exportAll(): Promise<ExportBundle> {
     db.resources.toArray(),
     db.journal.toArray(),
   ]);
-  const [members, comments, activity] = await Promise.all([
+  const [members, comments, activity, quickNotes, stickyNotes, pomodoroSessions, utilities] = await Promise.all([
     db.members.toArray(),
     db.comments.toArray(),
     db.activity.toArray(),
+    db.quickNotes.toArray(),
+    db.stickyNotes.toArray(),
+    db.pomodoroSessions.toArray(),
+    db.utilities.toArray(),
   ]);
 
   return {
@@ -64,6 +72,10 @@ export async function exportAll(): Promise<ExportBundle> {
     members,
     comments,
     activity,
+    quickNotes,
+    stickyNotes,
+    pomodoroSessions,
+    utilities,
     settings: settings ?? null,
   };
 }
@@ -81,7 +93,8 @@ export function downloadExport(bundle: ExportBundle, label = "backup"): void {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  // Keep the Blob alive until the browser has started reading the download.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 export class ImportError extends Error {}
@@ -139,6 +152,12 @@ export function validateBundle(data: unknown): ExportBundle {
     members: Array.isArray(data.members) ? (data.members as Member[]) : [],
     comments: Array.isArray(data.comments) ? (data.comments as Comment[]) : [],
     activity: Array.isArray(data.activity) ? (data.activity as Activity[]) : [],
+    quickNotes: Array.isArray(data.quickNotes) ? (data.quickNotes as QuickNote[]) : [],
+    stickyNotes: Array.isArray(data.stickyNotes) ? (data.stickyNotes as StickyNote[]) : [],
+    pomodoroSessions: Array.isArray(data.pomodoroSessions)
+      ? (data.pomodoroSessions as PomodoroSession[])
+      : [],
+    utilities: Array.isArray(data.utilities) ? (data.utilities as UtilityRecord[]) : [],
     settings: (isRecord(data.settings) ? data.settings : null) as AppSettings | null,
   };
 }
@@ -162,6 +181,10 @@ export async function importAll(bundle: ExportBundle): Promise<void> {
       db.members,
       db.comments,
       db.activity,
+      db.quickNotes,
+      db.stickyNotes,
+      db.pomodoroSessions,
+      db.utilities,
     ],
     async () => {
       await Promise.all([
@@ -177,6 +200,10 @@ export async function importAll(bundle: ExportBundle): Promise<void> {
         db.members.clear(),
         db.comments.clear(),
         db.activity.clear(),
+        db.quickNotes.clear(),
+        db.stickyNotes.clear(),
+        db.pomodoroSessions.clear(),
+        db.utilities.clear(),
       ]);
       await db.days.bulkPut(bundle.days);
       await db.habits.bulkPut(bundle.habits);
@@ -192,6 +219,11 @@ export async function importAll(bundle: ExportBundle): Promise<void> {
       if (bundle.members?.length) await db.members.bulkPut(bundle.members);
       if (bundle.comments?.length) await db.comments.bulkPut(bundle.comments);
       if (bundle.activity?.length) await db.activity.bulkPut(bundle.activity);
+      if (bundle.quickNotes?.length) await db.quickNotes.bulkPut(bundle.quickNotes);
+      if (bundle.stickyNotes?.length) await db.stickyNotes.bulkPut(bundle.stickyNotes);
+      if (bundle.pomodoroSessions?.length)
+        await db.pomodoroSessions.bulkPut(bundle.pomodoroSessions);
+      if (bundle.utilities?.length) await db.utilities.bulkPut(bundle.utilities);
     },
   );
 
@@ -239,6 +271,10 @@ export interface BundleSummary {
   notes: number;
   resources: number;
   journal: number;
+  quickNotes: number;
+  stickyNotes: number;
+  pomodoroSessions: number;
+  utilities: number;
 }
 
 /** Human-countable summary of what a bundle contains. */
@@ -254,6 +290,10 @@ export function describeBundle(b: ExportBundle): BundleSummary {
     notes: b.notes?.length ?? 0,
     resources: b.resources?.length ?? 0,
     journal: b.journal?.length ?? 0,
+    quickNotes: b.quickNotes?.length ?? 0,
+    stickyNotes: b.stickyNotes?.length ?? 0,
+    pomodoroSessions: b.pomodoroSessions?.length ?? 0,
+    utilities: b.utilities?.length ?? 0,
   };
 }
 
@@ -280,18 +320,25 @@ export function scopeBundleToWorkspace(
     notes: (full.notes ?? []).filter((n) => belongsTo(n.workspaceId, workspaceId)),
     resources: (full.resources ?? []).filter((r) => belongsTo(r.workspaceId, workspaceId)),
     journal: (full.journal ?? []).filter((e) => belongsTo(e.workspaceId, workspaceId)),
+    members: (full.members ?? []).filter((m) => m.workspaceId === workspaceId),
+    comments: (full.comments ?? []).filter((c) => c.workspaceId === workspaceId),
+    activity: (full.activity ?? []).filter((a) => a.workspaceId === workspaceId),
+    quickNotes: [],
+    stickyNotes: [],
+    pomodoroSessions: [],
+    utilities: [],
     settings: null,
   };
 }
 
 /** A bundle of only missions (with an empty scaffold for everything else). */
 export function missionsOnlyBundle(full: ExportBundle): ExportBundle {
-  return { ...full, days: [], habits: [], templates: [], recurring: [], workspaces: [], notes: [], resources: [], journal: [], settings: null };
+  return { ...full, days: [], habits: [], templates: [], recurring: [], workspaces: [], notes: [], resources: [], journal: [], members: [], comments: [], activity: [], quickNotes: [], stickyNotes: [], pomodoroSessions: [], utilities: [], settings: null };
 }
 
 /** A bundle of only journal entries. */
 export function journalOnlyBundle(full: ExportBundle): ExportBundle {
-  return { ...full, days: [], habits: [], templates: [], recurring: [], missions: [], workspaces: [], notes: [], resources: [], settings: null };
+  return { ...full, days: [], habits: [], templates: [], recurring: [], missions: [], workspaces: [], notes: [], resources: [], members: [], comments: [], activity: [], quickNotes: [], stickyNotes: [], pomodoroSessions: [], utilities: [], settings: null };
 }
 
 export type ImportMode = "replace" | "merge";
@@ -303,6 +350,10 @@ export interface ImportConflicts {
   notes: number;
   resources: number;
   journal: number;
+  quickNotes: number;
+  stickyNotes: number;
+  pomodoroSessions: number;
+  utilities: number;
 }
 
 /** Count how many incoming records already exist locally (by primary key). */
@@ -322,6 +373,10 @@ export async function detectConflicts(bundle: ExportBundle): Promise<ImportConfl
     notes: await has(db.notes, (bundle.notes ?? []).map((n) => n.id)),
     resources: await has(db.resources, (bundle.resources ?? []).map((r) => r.id)),
     journal: await has(db.journal, (bundle.journal ?? []).map((e) => e.id)),
+    quickNotes: await has(db.quickNotes, (bundle.quickNotes ?? []).map((n) => n.id)),
+    stickyNotes: await has(db.stickyNotes, (bundle.stickyNotes ?? []).map((n) => n.id)),
+    pomodoroSessions: await has(db.pomodoroSessions, (bundle.pomodoroSessions ?? []).map((s) => s.id)),
+    utilities: await has(db.utilities, (bundle.utilities ?? []).map((u) => u.id)),
   };
 }
 
@@ -353,7 +408,7 @@ export async function importBundle(
 
   await db.transaction(
     "rw",
-    [db.days, db.habits, db.templates, db.recurring, db.missions, db.workspaces, db.notes, db.resources, db.journal, db.members, db.comments, db.activity],
+    [db.days, db.habits, db.templates, db.recurring, db.missions, db.workspaces, db.notes, db.resources, db.journal, db.members, db.comments, db.activity, db.quickNotes, db.stickyNotes, db.pomodoroSessions, db.utilities],
     async () => {
       // Days: merge task lists so we never drop tasks already on a date.
       for (const incoming of bundle.days) {
@@ -385,6 +440,11 @@ export async function importBundle(
       if (bundle.members?.length) await db.members.bulkPut(bundle.members);
       if (bundle.comments?.length) await db.comments.bulkPut(bundle.comments);
       if (bundle.activity?.length) await db.activity.bulkPut(bundle.activity);
+      if (bundle.quickNotes?.length) await db.quickNotes.bulkPut(bundle.quickNotes);
+      if (bundle.stickyNotes?.length) await db.stickyNotes.bulkPut(bundle.stickyNotes);
+      if (bundle.pomodoroSessions?.length)
+        await db.pomodoroSessions.bulkPut(bundle.pomodoroSessions);
+      if (bundle.utilities?.length) await db.utilities.bulkPut(bundle.utilities);
     },
   );
   return { mode, summary: describeBundle(bundle) };
