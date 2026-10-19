@@ -288,6 +288,7 @@ function ToggleRow({
       <button
         type="button"
         role="switch"
+        aria-label={title}
         aria-checked={checked}
         disabled={disabled}
         onClick={onChange}

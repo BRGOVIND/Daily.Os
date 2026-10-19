@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
@@ -11,7 +12,13 @@ import { Habits } from "@/components/habits/Habits";
 import { Notes } from "@/components/notes/Notes";
 import { useDay } from "@/hooks/useDay";
 import { useHabits } from "@/hooks/useHabits";
-import { formatDayHeader, fromDateKey, isToday, toDateKey } from "@/lib/date";
+import { moveTaskToDay, restoreDeletedTask, restoreMovedTask } from "@/lib/db";
+import { formatDayHeader, fromDateKey, isToday, nextDayKey, toDateKey } from "@/lib/date";
+
+interface UndoAction {
+  message: string;
+  restore?: () => Promise<boolean>;
+}
 
 interface DayModalProps {
   dateKey: string | null;
@@ -44,11 +51,58 @@ export function DayModal({
     updateNotes,
   } = useDay(dateKey);
   const { habits, addHabit, removeHabit } = useHabits(today);
+  const [undoAction, setUndoAction] = useState<UndoAction | null>(null);
+
+  useEffect(() => setUndoAction(null), [dateKey]);
+  useEffect(() => {
+    if (!undoAction) return;
+    const timer = window.setTimeout(() => setUndoAction(null), 10000);
+    return () => window.clearTimeout(timer);
+  }, [undoAction]);
 
   const header = dateKey
     ? formatDayHeader(fromDateKey(dateKey))
     : { weekday: "", date: "" };
   const isCurrentDay = dateKey ? isToday(fromDateKey(dateKey)) : false;
+
+  const handleDeleteTask = (id: string) => {
+    if (!dateKey) return;
+    const task = day.tasks.find((item) => item.id === id);
+    if (!task) return;
+    const sourceKey = dateKey;
+    void deleteTask(id)
+      .then(() => setUndoAction({
+        message: "Task deleted",
+        restore: () => restoreDeletedTask(sourceKey, task),
+      }))
+      .catch(() => setUndoAction({ message: "Could not delete task" }));
+  };
+
+  const handleMoveTask = (id: string) => {
+    if (!dateKey) return;
+    const sourceKey = dateKey;
+    const targetKey = nextDayKey(sourceKey);
+    void moveTaskToDay(sourceKey, targetKey, id)
+      .then((original) => {
+        if (!original) return;
+        setUndoAction({
+          message: isCurrentDay ? "Moved to tomorrow" : "Moved to next day",
+          restore: () => restoreMovedTask(sourceKey, targetKey, original),
+        });
+      })
+      .catch(() => setUndoAction({ message: "Could not move task" }));
+  };
+
+  const handleUndo = () => {
+    const restore = undoAction?.restore;
+    if (!restore) return;
+    setUndoAction(null);
+    void restore().then((restored) => {
+      if (!restored) setUndoAction({ message: "Undo unavailable" });
+    }).catch(() => {
+      setUndoAction({ message: "Undo failed" });
+    });
+  };
 
   return (
     <Modal
@@ -101,7 +155,8 @@ export function DayModal({
           <TaskList
             tasks={day.tasks}
             onToggle={toggleTask}
-            onDelete={deleteTask}
+            onDelete={handleDeleteTask}
+            onMoveToNextDay={handleMoveTask}
             onAdd={() => dateKey && onRequestAddTask(dateKey)}
             today={today ? toDateKey(today) : undefined}
           />
@@ -122,6 +177,17 @@ export function DayModal({
 
           <Notes value={day.notes} onChange={updateNotes} />
         </div>
+
+        {undoAction && (
+          <div role="status" className="absolute inset-x-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-10 flex items-center justify-between gap-3 rounded-2xl bg-[#242127] px-4 py-3 text-sm text-white shadow-lift sm:inset-x-10">
+            <span>{undoAction.message}</span>
+            {undoAction.restore && (
+              <button type="button" onClick={handleUndo} className="shrink-0 rounded-full px-3 py-1 font-semibold text-white underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                Undo
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Floating save/done — changes persist automatically */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-card via-card/95 to-transparent px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-8 sm:px-10">

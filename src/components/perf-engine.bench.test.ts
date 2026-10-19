@@ -108,7 +108,6 @@ function timeIt(label: string, fn: () => void, iterations = 7): number {
     runs.push(performance.now() - t0);
   }
   const med = median(runs);
-  // eslint-disable-next-line no-console
   console.log(`BENCH ${label}: median=${med.toFixed(2)}ms min=${Math.min(...runs).toFixed(2)}ms max=${Math.max(...runs).toFixed(2)}ms`);
   return med;
 }

@@ -70,11 +70,17 @@ export function DataSection() {
   const doImport = async (mode: ImportMode) => {
     if (!pending || busy) return;
     setBusy(true);
-    const res = await importBundle(pending.bundle, mode);
-    setBusy(false);
-    setPending(null);
-    setResult(res);
-    setTimeout(() => setResult(null), 6000);
+    setError(null);
+    try {
+      const res = await importBundle(pending.bundle, mode);
+      setPending(null);
+      setResult(res);
+      setTimeout(() => setResult(null), 6000);
+    } catch {
+      setError("Import failed. Check your data before retrying.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const conflictTotal = pending
@@ -86,6 +92,7 @@ export function DataSection() {
       {/* Export */}
       <div className="flex flex-wrap items-center gap-2">
         <Select
+          aria-label="Export scope"
           value={scope}
           onChange={(e) => setScope(e.target.value)}
           className="h-9 w-auto text-[14px]"
@@ -137,10 +144,14 @@ export function DataSection() {
             <Count n={pending.summary.notes} label="notes" />
             <Count n={pending.summary.resources} label="resources" />
             <Count n={pending.summary.journal} label="journal" />
+            <Count n={pending.summary.quickNotes} label="quick notes" />
+            <Count n={pending.summary.stickyNotes} label="sticky notes" />
+            <Count n={pending.summary.pomodoroSessions} label="focus sessions" />
+            <Count n={pending.summary.utilities} label="utilities" />
           </div>
 
           {conflictTotal > 0 && (
-            <p className="flex items-start gap-1.5 rounded-lg bg-warning/10 px-3 py-2 text-[13px] text-[#8A6100]">
+            <p className="flex items-start gap-1.5 rounded-lg bg-warning/10 px-3 py-2 text-[13px] text-ink">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               {conflictTotal} record{conflictTotal === 1 ? "" : "s"} already exist here.
               Merge keeps both (tasks are combined per day); Replace overwrites everything.

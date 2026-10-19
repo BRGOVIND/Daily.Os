@@ -35,14 +35,14 @@ const BAND_DOT: Record<string, string> = {
 const PRODUCTIVITY_BAND: Record<ProductivityBand, { label: string; className: string }> = {
   thriving: { label: "Thriving", className: "bg-success/12 text-success" },
   steady: { label: "Steady", className: "bg-accent/10 text-accent" },
-  building: { label: "Building", className: "bg-warning/15 text-[#8A6100]" },
+  building: { label: "Building", className: "bg-warning/15 text-ink" },
   struggling: { label: "Rebuilding", className: "bg-[#E5484D]/12 text-[#C13030]" },
 };
 
 const BURNOUT_BAND: Record<BurnoutRisk, { label: string; className: string }> = {
   none: { label: "Balanced", className: "bg-success/12 text-success" },
   low: { label: "Low", className: "bg-accent/10 text-accent" },
-  elevated: { label: "Elevated", className: "bg-warning/15 text-[#8A6100]" },
+  elevated: { label: "Elevated", className: "bg-warning/15 text-ink" },
   high: { label: "High", className: "bg-[#E5484D]/12 text-[#C13030]" },
 };
 

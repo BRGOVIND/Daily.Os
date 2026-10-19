@@ -37,7 +37,7 @@ export function CalendarHeader({
         className="flex min-w-0 flex-col font-display text-[2.25rem] font-light leading-[1.02] tracking-[-0.02em] text-ink sm:block sm:text-6xl sm:leading-[1.05]"
       >
         <span className="truncate">{format(month, "MMMM")}</span>
-        <span className="text-ink-muted/60 sm:ml-3">{format(month, "yyyy")}</span>
+        <span className="text-ink-muted sm:ml-3">{format(month, "yyyy")}</span>
       </motion.h1>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -45,7 +45,7 @@ export function CalendarHeader({
           variant="secondary"
           size="sm"
           onClick={onToday}
-          className="mr-0.5 h-9 sm:mr-1 sm:h-8"
+          className="mr-0.5 h-11 sm:mr-1 sm:h-8"
         >
           Today
         </Button>

@@ -1,4 +1,5 @@
 import Dexie, { type Table } from "dexie";
+import { addDays, differenceInCalendarDays, parseISO } from "date-fns";
 import type {
   Activity,
   AppSettings,
@@ -252,10 +253,14 @@ export async function copyDatabase(fromName: string, toName: string): Promise<vo
     from.resources.toArray(),
     from.journal.toArray(),
   ]);
-  const [members, comments, activity] = await Promise.all([
+  const [members, comments, activity, quickNotes, stickyNotes, pomodoroSessions, utilities] = await Promise.all([
     from.members.toArray(),
     from.comments.toArray(),
     from.activity.toArray(),
+    from.quickNotes.toArray(),
+    from.stickyNotes.toArray(),
+    from.pomodoroSessions.toArray(),
+    from.utilities.toArray(),
   ]);
   await to.transaction(
     "rw",
@@ -274,6 +279,10 @@ export async function copyDatabase(fromName: string, toName: string): Promise<vo
       to.members,
       to.comments,
       to.activity,
+      to.quickNotes,
+      to.stickyNotes,
+      to.pomodoroSessions,
+      to.utilities,
     ],
     async () => {
       if (days.length) await to.days.bulkPut(days);
@@ -289,6 +298,10 @@ export async function copyDatabase(fromName: string, toName: string): Promise<vo
       if (members.length) await to.members.bulkPut(members);
       if (comments.length) await to.comments.bulkPut(comments);
       if (activity.length) await to.activity.bulkPut(activity);
+      if (quickNotes.length) await to.quickNotes.bulkPut(quickNotes);
+      if (stickyNotes.length) await to.stickyNotes.bulkPut(stickyNotes);
+      if (pomodoroSessions.length) await to.pomodoroSessions.bulkPut(pomodoroSessions);
+      if (utilities.length) await to.utilities.bulkPut(utilities);
     },
   );
   if (from !== active) from.close();
@@ -341,6 +354,63 @@ export async function getDaysInRange(
   toKey: string,
 ): Promise<DayRecord[]> {
   return db.days.where("date").between(fromKey, toKey, true, true).toArray();
+}
+
+/** Move one-off task between days in one transaction; return original for Undo. */
+export async function moveTaskToDay(
+  fromKey: string,
+  toKey: string,
+  taskId: string,
+): Promise<Task | null> {
+  if (fromKey === toKey) return null;
+  return db.transaction("rw", db.days, async () => {
+    const source = await db.days.get(fromKey);
+    const task = source?.tasks.find((item) => item.id === taskId);
+    if (!source || !task || task.completed || task.recurrence !== "none") return null;
+    const target = (await db.days.get(toKey)) ?? emptyDay(toKey);
+    if (target.tasks.some((item) => item.id === taskId)) return null;
+
+    const now = Date.now();
+    const dayOffset = differenceInCalendarDays(parseISO(toKey), parseISO(fromKey));
+    const moved = {
+      ...task,
+      order: target.tasks.length,
+      reminderAt: typeof task.reminderAt === "number" ? addDays(new Date(task.reminderAt), dayOffset).getTime() : null,
+      timesDeferred: (task.timesDeferred ?? 0) + 1,
+      timesRescheduled: (task.timesRescheduled ?? 0) + 1,
+    };
+    await db.days.put({ ...source, tasks: source.tasks.filter((item) => item.id !== taskId), updatedAt: now });
+    await db.days.put({ ...target, tasks: [...target.tasks, moved], updatedAt: now });
+    return task;
+  });
+}
+
+/** Reverse a move only while its task still exists in target day. */
+export async function restoreMovedTask(
+  fromKey: string,
+  toKey: string,
+  original: Task,
+): Promise<boolean> {
+  return db.transaction("rw", db.days, async () => {
+    const target = await db.days.get(toKey);
+    if (!target?.tasks.some((item) => item.id === original.id)) return false;
+    const source = (await db.days.get(fromKey)) ?? emptyDay(fromKey);
+    if (source.tasks.some((item) => item.id === original.id)) return false;
+    const now = Date.now();
+    await db.days.put({ ...target, tasks: target.tasks.filter((item) => item.id !== original.id), updatedAt: now });
+    await db.days.put({ ...source, tasks: [...source.tasks, original], updatedAt: now });
+    return true;
+  });
+}
+
+/** Reinsert a deleted task with its original metadata and order. */
+export async function restoreDeletedTask(dateKey: string, task: Task): Promise<boolean> {
+  return db.transaction("rw", db.days, async () => {
+    const day = (await db.days.get(dateKey)) ?? emptyDay(dateKey);
+    if (day.tasks.some((item) => item.id === task.id)) return false;
+    await db.days.put({ ...day, tasks: [...day.tasks, task], updatedAt: Date.now() });
+    return true;
+  });
 }
 
 /**

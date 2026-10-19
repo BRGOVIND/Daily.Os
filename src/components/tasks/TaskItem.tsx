@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Bell, Check, Clock, Flag, Repeat, Trash2 } from "lucide-react";
+import { ArrowRight, Bell, Check, Clock, Flag, Repeat, Trash2 } from "lucide-react";
 import { spring } from "@/lib/motion";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ interface TaskItemProps {
   task: Task;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onMoveToNextDay: (id: string) => void;
   /** Today's date key — enables the engine's calculated-priority badge. */
   today?: string;
 }
@@ -38,6 +39,7 @@ export const TaskItem = memo(function TaskItem({
   task,
   onToggle,
   onDelete,
+  onMoveToNextDay,
   today,
 }: TaskItemProps) {
   const swatch = COLOR_MAP[task.color];
@@ -74,20 +76,13 @@ export const TaskItem = memo(function TaskItem({
         aria-pressed={task.completed}
         aria-label={task.completed ? "Mark as not done" : "Mark as done"}
         whileTap={{ scale: 0.85 }}
-        className={cn(
-          "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-          task.completed
-            ? "border-success bg-success text-white"
-            : "border-line text-transparent hover:border-accent",
-        )}
+        className="-m-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
-        <motion.span
-          initial={false}
-          animate={{ scale: task.completed ? 1 : 0 }}
-          transition={spring.pop}
-        >
-          <Check className="h-3.5 w-3.5" strokeWidth={3} />
-        </motion.span>
+        <span className={cn("flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors", task.completed ? "border-success bg-success text-white" : "border-line text-transparent hover:border-accent")}>
+          <motion.span initial={false} animate={{ scale: task.completed ? 1 : 0 }} transition={spring.pop}>
+            <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          </motion.span>
+        </span>
       </motion.button>
 
       <div className="min-w-0 flex-1">
@@ -149,14 +144,27 @@ export const TaskItem = memo(function TaskItem({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => onDelete(task.id)}
-        aria-label="Delete task"
-        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-muted/50 opacity-0 transition-all hover:bg-accent/10 hover:text-accent focus-visible:opacity-100 group-hover:opacity-100"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+      <div className="-mr-2 -mt-2 flex shrink-0 items-center opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+        {!task.completed && task.recurrence === "none" && (
+          <button
+            type="button"
+            onClick={() => onMoveToNextDay(task.id)}
+            aria-label={`Move ${task.title} to next day`}
+            title="Move to next day"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => onDelete(task.id)}
+          aria-label={`Delete ${task.title}`}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-accent/10 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
     </motion.li>
   );
 });

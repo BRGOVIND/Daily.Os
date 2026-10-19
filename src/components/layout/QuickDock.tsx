@@ -56,7 +56,7 @@ export function QuickDock({
   };
 
   return (
-    <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] z-40 flex flex-col items-end gap-2.5 sm:bottom-[calc(7rem+env(safe-area-inset-bottom))] sm:right-[calc(2rem+env(safe-area-inset-right))]">
+    <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] z-40 hidden flex-col items-end gap-2.5 sm:bottom-[calc(7rem+env(safe-area-inset-bottom))] sm:right-[calc(2rem+env(safe-area-inset-right))] sm:flex">
       <AnimatePresence>
         {open && (
           <motion.ul

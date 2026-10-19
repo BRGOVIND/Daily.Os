@@ -3,6 +3,24 @@
 All notable changes to Daily OS. Dates are release-day snapshots; the app is
 offline-first with no telemetry, so "release" means a reviewed local build.
 
+## Unreleased
+
+### Improved
+- Phone navigation now puts Today, Calendar, task capture, Spaces and More within thumb reach.
+- Task capture starts compact; the week strip and agenda make the next few days easier to scan.
+- One-off tasks can move to tomorrow, and task moves or deletions can be undone.
+- Fresh PWA installs cache all build chunks, including unopened dialogs, for offline use.
+- Updated Next.js, React, ESLint and Vitest; aligned the npm version with the desktop release.
+
+### Fixed
+- Guest data loss is explained before entry, and profile creation no longer submits twice.
+- Switching profiles no longer leaves the dashboard blank.
+- Settings controls now have accessible names, and dark theme labels meet contrast checks.
+- Backup download Blobs remain available while the browser starts the download.
+- Full backups now include quick notes, sticky notes, focus sessions and utility data;
+  scoped backups no longer carry unrelated collaboration records.
+- Saving Guest data as a profile now carries those productivity records too.
+
 ## v3.1.0 — "Pro" (polish)
 
 Feature-complete already; this release is about making Daily OS feel like premium

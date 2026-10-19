@@ -40,7 +40,7 @@ export function TopNav({
             {APP_NAME}
           </span>
           {isGuest && (
-            <span className="shrink-0 rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#8A6100]">
+            <span className="shrink-0 rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink">
               Guest
             </span>
           )}
@@ -72,7 +72,7 @@ export function TopNav({
             size="icon"
             aria-label="Workspaces"
             onClick={onOpenWorkspaces}
-            className="h-11 w-11 sm:h-10 sm:w-10"
+            className="hidden h-11 w-11 sm:inline-flex sm:h-10 sm:w-10"
           >
             <LayoutGrid className="h-[18px] w-[18px]" />
           </Button>
@@ -81,7 +81,7 @@ export function TopNav({
             size="icon"
             aria-label="Missions"
             onClick={onOpenMissions}
-            className="h-11 w-11 sm:h-10 sm:w-10"
+            className="hidden h-11 w-11 sm:inline-flex sm:h-10 sm:w-10"
           >
             <Rocket className="h-[18px] w-[18px]" />
           </Button>
@@ -90,7 +90,7 @@ export function TopNav({
             size="icon"
             aria-label="Insights"
             onClick={onOpenStats}
-            className="h-11 w-11 sm:h-10 sm:w-10"
+            className="hidden h-11 w-11 sm:inline-flex sm:h-10 sm:w-10"
           >
             <BarChart3 className="h-[18px] w-[18px]" />
           </Button>
@@ -99,7 +99,7 @@ export function TopNav({
             size="icon"
             aria-label="Settings"
             onClick={onOpenSettings}
-            className="h-11 w-11 sm:h-10 sm:w-10"
+            className="hidden h-11 w-11 sm:inline-flex sm:h-10 sm:w-10"
           >
             <Settings className="h-[18px] w-[18px]" />
           </Button>

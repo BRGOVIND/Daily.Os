@@ -34,6 +34,33 @@ export function PwaController() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [iosHint, setIosHint] = useState(false);
+  const [iosEligible, setIosEligible] = useState(false);
+  const [dashboardReady, setDashboardReady] = useState(false);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      if (document.querySelector("[data-daily-os-dashboard]")) {
+        setDashboardReady(true);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    if (document.querySelector("[data-daily-os-dashboard]")) {
+      setDashboardReady(true);
+      observer.disconnect();
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  // Let people enter and use the planner before suggesting installation.
+  useEffect(() => {
+    if (!dashboardReady || (!deferred && !iosEligible)) return;
+    const timer = window.setTimeout(() => {
+      if (deferred) setVisible(true);
+      else setIosHint(true);
+    }, 60_000);
+    return () => window.clearTimeout(timer);
+  }, [dashboardReady, deferred, iosEligible]);
 
   useEffect(() => {
     if (
@@ -58,7 +85,6 @@ export function PwaController() {
       e.preventDefault();
       if (localStorage.getItem(DISMISS_KEY)) return;
       setDeferred(e as BeforeInstallPromptEvent);
-      setVisible(true);
     };
     const onInstalled = () => {
       // Chrome installed it via the browser UI (or our button) — retire the nudge.
@@ -82,7 +108,7 @@ export function PwaController() {
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     if (standalone || !isIos()) return;
     if (localStorage.getItem(IOS_DISMISS_KEY)) return;
-    setIosHint(true);
+    setIosEligible(true);
   }, []);
 
   const dismissIos = () => {
@@ -113,8 +139,7 @@ export function PwaController() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
           transition={spring.soft}
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
-          className="fixed left-1/2 z-40 flex w-[min(92vw,26rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift"
+          className="fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92vw,26rem)] items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
           role="dialog"
           aria-label="Install Daily OS"
         >
@@ -152,8 +177,7 @@ export function PwaController() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 16, scale: 0.98 }}
           transition={spring.soft}
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
-          className="fixed left-1/2 z-40 flex w-[min(92vw,26rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift"
+          className="fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[min(92vw,26rem)] items-center gap-3 rounded-2xl border border-line bg-card p-3 pl-4 shadow-lift sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
           role="dialog"
           aria-label="Add Daily OS to your Home Screen"
         >

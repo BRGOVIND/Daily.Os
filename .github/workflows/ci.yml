@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint · Typecheck · Build
+    name: Lint · Typecheck · Test · Build · Export
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,5 +32,13 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Tests
+        run: npm test
+
       - name: Build
         run: npm run build
+
+      - name: Static export
+        run: npm run build
+        env:
+          NEXT_OUTPUT_EXPORT: "1"

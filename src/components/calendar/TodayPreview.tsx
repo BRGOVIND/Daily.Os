@@ -32,7 +32,7 @@ export function TodayPreview({ today, onOpen }: TodayPreviewProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.4 }}
       whileHover={{ y: -3 }}
-      className="group mt-10 flex w-full items-center justify-between gap-6 rounded-3xl border border-line bg-card p-6 text-left shadow-soft transition-all hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:p-8"
+      className="group mt-1 flex w-full items-center justify-between gap-4 rounded-3xl border border-line bg-card p-5 text-left shadow-soft transition-all hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 sm:mt-10 sm:gap-6 sm:p-8"
     >
       <div className="min-w-0">
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
@@ -60,7 +60,7 @@ export function TodayPreview({ today, onOpen }: TodayPreviewProps) {
             </span>
           )}
           {day.tasks.length === 0 && focus.length === 0 && (
-            <span className="text-ink-muted/70">A clean slate. Tap to begin.</span>
+            <span className="text-ink-muted">A clean slate. Tap to begin.</span>
           )}
         </div>
       </div>

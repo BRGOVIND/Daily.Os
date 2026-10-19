@@ -4,6 +4,8 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { TopNav as TopNavBase } from "@/components/layout/TopNav";
 import { Fab } from "@/components/layout/Fab";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { WeekStrip } from "@/components/calendar/WeekStrip";
 import { Calendar as CalendarBase } from "@/components/calendar/Calendar";
 import { TodayPreview as TodayPreviewBase } from "@/components/calendar/TodayPreview";
 import { DayModal } from "@/components/day/DayModal";
@@ -112,6 +114,7 @@ export function AppShell() {
   const [today, setToday] = useState<Date | null>(null);
   const [month, setMonth] = useState<Date | null>(null);
   const [direction, setDirection] = useState(0);
+  const [mobileView, setMobileView] = useState<"today" | "calendar">("today");
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [addTaskFor, setAddTaskFor] = useState<string | null>(null);
@@ -130,6 +133,7 @@ export function AppShell() {
   const [focusOpen, setFocusOpen] = useState(false);
   const [stickiesOpen, setStickiesOpen] = useState(false);
   const [routinesOpen, setRoutinesOpen] = useState(false);
+  const [utilitiesOpen, setUtilitiesOpen] = useState(false);
   const [firedReminders, setFiredReminders] = useState<FiredReminder[]>([]);
 
   const { settings } = useSettings();
@@ -180,25 +184,20 @@ export function AppShell() {
     };
   }, []);
 
-  // Warm the lazy dialog chunks during idle time after the calendar paints, so
-  // the first open of Settings/Stats/Workspaces/etc. is instant instead of
-  // waiting on a chunk fetch (the "brief flash before the UI appears"). Still
-  // code-split — just prefetched, so the initial bundle is unchanged.
+  // Warm common desktop dialogs when idle. Phones and constrained connections
+  // keep optional chunks on demand to avoid background downloads and parsing.
   useEffect(() => {
     if (!mounted) return;
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (window.matchMedia("(max-width: 639px)").matches || connection?.saveData ||
+      connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
     const run = () => {
       void import("@/components/layout/SettingsModal");
       void import("@/components/stats/StatsModal");
       void import("@/components/workspace/WorkspacesModal");
       void import("@/components/workspace/CommandPalette");
-      void import("@/components/missions/MissionsModal");
-      void import("@/components/pomodoro/PomodoroModal");
-      void import("@/components/templates/DayTemplatesModal");
-      void import("@/components/notes/QuickNotesPopover");
-      void import("@/components/notes/StickyBoard");
-      void import("@/components/focus/FocusMode");
-      void import("@/components/review/DailyReviewModal");
-      void import("@/components/layout/KeyboardHelp");
     };
     const ric = window.requestIdleCallback;
     if (ric) {
@@ -259,10 +258,15 @@ export function AppShell() {
 
   // Daily review scheduling.
   const reviewCompleted = todayDay.review !== null;
+  const hasDayActivity =
+    todayDay.tasks.some((task) => task.completed) ||
+    todayDay.focus.some((item) => item.done) ||
+    todayDay.notes.trim().length > 0 ||
+    Object.values(todayDay.habitLog).some(Boolean);
   const { due: reviewDue, dismiss: dismissReview } = useDailyReview(
     today,
     reviewCompleted,
-    settings.reviewEnabled,
+    settings.reviewEnabled && hasDayActivity,
   );
   useEffect(() => {
     if (reviewDue && todayKey && reviewFor === null) setReviewFor(todayKey);
@@ -313,6 +317,11 @@ export function AppShell() {
   const openFocus = useCallback(() => setFocusOpen(true), []);
   const openStickies = useCallback(() => setStickiesOpen(true), []);
   const openRoutines = useCallback(() => setRoutinesOpen(true), []);
+  const openUtilities = useCallback(() => setUtilitiesOpen(true), []);
+  const changeMobileView = useCallback((view: "today" | "calendar") => {
+    setMobileView(view);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   const openToday = useCallback(() => {
     if (todayKey) setSelectedDate(todayKey);
   }, [todayKey]);
@@ -374,7 +383,8 @@ export function AppShell() {
     focusOpen ||
     routinesOpen ||
     quickNotesOpen ||
-    stickiesOpen;
+    stickiesOpen ||
+    utilitiesOpen;
 
   useKeyboardShortcuts(
     {
@@ -419,18 +429,24 @@ export function AppShell() {
         onOpenSettings={openSettings}
       />
 
-      <main className="mx-auto max-w-5xl px-3 pb-32 pt-8 sm:px-8 sm:pt-14">
-        <Calendar
-          month={month}
-          direction={direction}
-          onPrev={goPrev}
-          onNext={goNext}
-          onToday={goToday}
-          onSelect={setSelectedDate}
-        />
-        <TodayPreview today={today} onOpen={setSelectedDate} />
-        <div id="agenda" className="scroll-mt-4">
-          <CalendarAgenda today={today} onOpenDay={setSelectedDate} />
+      <main data-daily-os-dashboard className="mx-auto max-w-5xl px-3 pb-28 pt-6 sm:px-8 sm:pb-32 sm:pt-14">
+        <div className={mobileView === "calendar" ? "block" : "hidden sm:block"}>
+          <Calendar
+            month={month}
+            direction={direction}
+            onPrev={goPrev}
+            onNext={goNext}
+            onToday={goToday}
+            onSelect={setSelectedDate}
+          />
+        </div>
+        <div className={mobileView === "today" ? "block" : "hidden sm:block"}>
+          <h1 className="sr-only sm:hidden">Today</h1>
+          <WeekStrip today={today} onSelect={setSelectedDate} />
+          <TodayPreview today={today} onOpen={setSelectedDate} />
+          <div id="agenda" className="scroll-mt-4">
+            <CalendarAgenda today={today} onOpenDay={setSelectedDate} />
+          </div>
         </div>
       </main>
 
@@ -442,7 +458,22 @@ export function AppShell() {
         onRoutines={openRoutines}
       />
       <Fab onClick={openAddTask} />
-      <DailyUtilitiesPanel />
+      <MobileNav
+        view={mobileView}
+        onViewChange={changeMobileView}
+        onAddTask={openAddTask}
+        onOpenWorkspaces={openWorkspaces}
+        onOpenMissions={openMissions}
+        onOpenStats={openStats}
+        onOpenSettings={openSettings}
+        onOpenQuickNote={openQuickNotes}
+        onOpenPomodoro={openPomodoro}
+        onOpenFocus={openFocus}
+        onOpenStickies={openStickies}
+        onOpenRoutines={openRoutines}
+        onOpenUtilities={openUtilities}
+      />
+      <DailyUtilitiesPanel open={utilitiesOpen} onOpenChange={setUtilitiesOpen} />
 
       <DayModal
         dateKey={selectedDate}
