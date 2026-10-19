@@ -37,7 +37,7 @@ export function CalendarGrid({
         {WEEKDAY_LABELS.map((label) => (
           <div
             key={label}
-            className="text-center text-[11px] font-medium uppercase tracking-[0.1em] text-ink-muted/70"
+            className="text-center text-[11px] font-medium uppercase tracking-[0.1em] text-ink-muted"
           >
             <span className="hidden sm:inline">{label}</span>
             <span className="sm:hidden">{label.charAt(0)}</span>
