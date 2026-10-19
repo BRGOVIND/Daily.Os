@@ -113,6 +113,9 @@ export function ProfilePicker({
           >
             <UserRound className="h-3.5 w-3.5" /> Continue as Guest
           </button>
+          <p className="mt-2 text-xs text-ink-muted">
+            Guest data clears on reload. Create a profile to keep it.
+          </p>
         </div>
       </motion.div>
     </div>
