@@ -18,7 +18,7 @@ import { APP_NAME } from "@/lib/constants";
 import { BrandMark } from "@/components/ui/BrandMark";
 
 /** Update to the public repository URL before release. */
-const REPO_URL = "https://github.com";
+const REPO_URL = "https://github.com/BRGOVIND/Daily.Os";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
